@@ -28,11 +28,9 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 
 ### 📚 **Publication Management**
 - **607 Publications**: Complete NASA Space Biology research database
-- **Advanced Filtering**: Search by title, ID, year, organism, and link status
-- **Multiple Views**: Grid, list, and compact viewing modes
-- **Bookmark System**: Save favorite publications
-- **Export Functionality**: CSV export with bookmarks and metadata
+- **Simple Search**: Search by title or ID
 - **Direct Links**: Click to open publications in new tabs
+- **Clean Interface**: Simple, focused browsing experience
 
 ### ⚡ **Technical Excellence**
 - **Real-time Processing**: Client-side embeddings with serverless retrieval
@@ -57,7 +55,7 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 ├─────────────────────────────────────────────────────────────────┤
 │  📚 Publications Tab  │  🎨 UI Components  │  📱 Responsive     │
 │  • Browse 607 Papers │  • Glassmorphism   │  • Mobile Ready   │
-│  • Quick Search      │  • Space Theme     │  • Touch Friendly │
+│  • Simple Search     │  • Space Theme     │  • Touch Friendly │
 │  • Direct Links      │  • Animations      │  • Cross Platform│
 └─────────────────────────────────────────────────────────────────┘
                                 │
@@ -106,9 +104,9 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 
 ### 2. Install Dependencies
 
-   ```bash
+```bash
 # Install Node.js dependencies
-   npm install
+npm install
 
 # Install Python dependencies
 pip install -r scripts/requirements.txt
@@ -138,7 +136,7 @@ python scripts/preprocess.py SB_publication_PMC.csv --skip-crawling --build-grap
 
 ### 4. Environment Setup
 
-   ```bash
+```bash
 # Copy environment template
 cp .env.example .env
 
@@ -148,9 +146,9 @@ echo "GROQ_API_KEY=your_groq_api_key_here" >> .env
 
 ### 5. Run Locally
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
 Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
 
@@ -189,7 +187,7 @@ vercel env add GROQ_API_KEY
 
 ### Publications Tab
 - **Browse All**: Explore all 607 NASA publications
-- **Quick Search**: Find specific papers instantly
+- **Simple Search**: Find specific papers by title or ID
 - **Direct Access**: Click to open papers in new tabs
 - **Clean Interface**: Simple, focused browsing experience
 
