@@ -598,6 +598,7 @@ export default function Page() {
           <div className="absolute top-1/5 left-0 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '5s', animationDuration: '2s' }}></div>
           <div className="absolute bottom-1/5 right-0 w-1 h-1 bg-blue-200 rounded-full animate-ping" style={{ animationDelay: '7s', animationDuration: '1.5s' }}></div>
         </div>
+      </div>
 
       {/* Main Content */}
       <div className="relative z-10">
