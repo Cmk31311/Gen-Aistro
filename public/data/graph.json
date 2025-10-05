@@ -1,0 +1,1736 @@
+{
+  "nodes": [
+    {
+      "id": "zebrafish",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "mice",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "arabidopsis",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "mouse",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "tissue",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "organ",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "drosophila",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "rats",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "human",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "organs",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "humans",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "cell",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "rat",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "tissues",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "cells",
+      "type": "organism",
+      "count": 1
+    },
+    {
+      "id": "space",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "spaceflight",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "galactic",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "cosmic",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "solar",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "microgravity",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "radiation",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "station",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "weightlessness",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "iss",
+      "type": "condition",
+      "count": 1
+    },
+    {
+      "id": "metabolism",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "enzyme",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "muscle",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "receptor",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "development",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "apoptosis",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "growth",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "gene",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "bone",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "cardiac",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "regulation",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "proliferation",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "immune",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "neural",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "expression",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "hormone",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "differentiation",
+      "type": "outcome",
+      "count": 1
+    },
+    {
+      "id": "protein",
+      "type": "outcome",
+      "count": 1
+    }
+  ],
+  "links": [
+    {
+      "source": "mice",
+      "target": "tissues",
+      "weight": 682
+    },
+    {
+      "source": "rats",
+      "target": "tissues",
+      "weight": 154
+    },
+    {
+      "source": "humans",
+      "target": "tissues",
+      "weight": 244
+    },
+    {
+      "source": "mouse",
+      "target": "tissues",
+      "weight": 522
+    },
+    {
+      "source": "human",
+      "target": "tissues",
+      "weight": 598
+    },
+    {
+      "source": "mice",
+      "target": "rats",
+      "weight": 578
+    },
+    {
+      "source": "humans",
+      "target": "mice",
+      "weight": 550
+    },
+    {
+      "source": "mice",
+      "target": "mouse",
+      "weight": 1396
+    },
+    {
+      "source": "human",
+      "target": "mice",
+      "weight": 1080
+    },
+    {
+      "source": "humans",
+      "target": "rats",
+      "weight": 238
+    },
+    {
+      "source": "mouse",
+      "target": "rats",
+      "weight": 340
+    },
+    {
+      "source": "human",
+      "target": "rats",
+      "weight": 346
+    },
+    {
+      "source": "humans",
+      "target": "mouse",
+      "weight": 338
+    },
+    {
+      "source": "human",
+      "target": "humans",
+      "weight": 788
+    },
+    {
+      "source": "human",
+      "target": "mouse",
+      "weight": 880
+    },
+    {
+      "source": "space",
+      "target": "spaceflight",
+      "weight": 2874
+    },
+    {
+      "source": "microgravity",
+      "target": "space",
+      "weight": 2328
+    },
+    {
+      "source": "space",
+      "target": "weightlessness",
+      "weight": 294
+    },
+    {
+      "source": "microgravity",
+      "target": "spaceflight",
+      "weight": 2302
+    },
+    {
+      "source": "spaceflight",
+      "target": "weightlessness",
+      "weight": 276
+    },
+    {
+      "source": "microgravity",
+      "target": "weightlessness",
+      "weight": 288
+    },
+    {
+      "source": "metabolism",
+      "target": "muscle",
+      "weight": 326
+    },
+    {
+      "source": "immune",
+      "target": "muscle",
+      "weight": 310
+    },
+    {
+      "source": "bone",
+      "target": "muscle",
+      "weight": 598
+    },
+    {
+      "source": "immune",
+      "target": "metabolism",
+      "weight": 440
+    },
+    {
+      "source": "bone",
+      "target": "metabolism",
+      "weight": 376
+    },
+    {
+      "source": "bone",
+      "target": "immune",
+      "weight": 406
+    },
+    {
+      "source": "tissue",
+      "target": "tissues",
+      "weight": 1044
+    },
+    {
+      "source": "organs",
+      "target": "tissues",
+      "weight": 266
+    },
+    {
+      "source": "mice",
+      "target": "tissue",
+      "weight": 1390
+    },
+    {
+      "source": "mice",
+      "target": "organs",
+      "weight": 212
+    },
+    {
+      "source": "mouse",
+      "target": "tissue",
+      "weight": 1020
+    },
+    {
+      "source": "organs",
+      "target": "tissue",
+      "weight": 286
+    },
+    {
+      "source": "mouse",
+      "target": "organs",
+      "weight": 132
+    },
+    {
+      "source": "enzyme",
+      "target": "metabolism",
+      "weight": 222
+    },
+    {
+      "source": "growth",
+      "target": "metabolism",
+      "weight": 774
+    },
+    {
+      "source": "gene",
+      "target": "metabolism",
+      "weight": 1058
+    },
+    {
+      "source": "cardiac",
+      "target": "metabolism",
+      "weight": 112
+    },
+    {
+      "source": "expression",
+      "target": "metabolism",
+      "weight": 1022
+    },
+    {
+      "source": "enzyme",
+      "target": "muscle",
+      "weight": 128
+    },
+    {
+      "source": "enzyme",
+      "target": "growth",
+      "weight": 290
+    },
+    {
+      "source": "enzyme",
+      "target": "gene",
+      "weight": 444
+    },
+    {
+      "source": "bone",
+      "target": "enzyme",
+      "weight": 72
+    },
+    {
+      "source": "cardiac",
+      "target": "enzyme",
+      "weight": 52
+    },
+    {
+      "source": "enzyme",
+      "target": "immune",
+      "weight": 120
+    },
+    {
+      "source": "enzyme",
+      "target": "expression",
+      "weight": 422
+    },
+    {
+      "source": "growth",
+      "target": "muscle",
+      "weight": 340
+    },
+    {
+      "source": "gene",
+      "target": "muscle",
+      "weight": 680
+    },
+    {
+      "source": "cardiac",
+      "target": "muscle",
+      "weight": 220
+    },
+    {
+      "source": "expression",
+      "target": "muscle",
+      "weight": 802
+    },
+    {
+      "source": "gene",
+      "target": "growth",
+      "weight": 2090
+    },
+    {
+      "source": "bone",
+      "target": "growth",
+      "weight": 600
+    },
+    {
+      "source": "cardiac",
+      "target": "growth",
+      "weight": 120
+    },
+    {
+      "source": "growth",
+      "target": "immune",
+      "weight": 478
+    },
+    {
+      "source": "expression",
+      "target": "growth",
+      "weight": 1978
+    },
+    {
+      "source": "bone",
+      "target": "gene",
+      "weight": 706
+    },
+    {
+      "source": "cardiac",
+      "target": "gene",
+      "weight": 266
+    },
+    {
+      "source": "gene",
+      "target": "immune",
+      "weight": 1082
+    },
+    {
+      "source": "expression",
+      "target": "gene",
+      "weight": 3610
+    },
+    {
+      "source": "bone",
+      "target": "cardiac",
+      "weight": 146
+    },
+    {
+      "source": "bone",
+      "target": "expression",
+      "weight": 850
+    },
+    {
+      "source": "cardiac",
+      "target": "immune",
+      "weight": 148
+    },
+    {
+      "source": "cardiac",
+      "target": "expression",
+      "weight": 336
+    },
+    {
+      "source": "expression",
+      "target": "immune",
+      "weight": 1148
+    },
+    {
+      "source": "iss",
+      "target": "microgravity",
+      "weight": 1154
+    },
+    {
+      "source": "iss",
+      "target": "space",
+      "weight": 1644
+    },
+    {
+      "source": "development",
+      "target": "growth",
+      "weight": 1396
+    },
+    {
+      "source": "rat",
+      "target": "tissues",
+      "weight": 144
+    },
+    {
+      "source": "cell",
+      "target": "tissues",
+      "weight": 1058
+    },
+    {
+      "source": "cells",
+      "target": "tissues",
+      "weight": 938
+    },
+    {
+      "source": "mice",
+      "target": "rat",
+      "weight": 428
+    },
+    {
+      "source": "cell",
+      "target": "rat",
+      "weight": 484
+    },
+    {
+      "source": "rat",
+      "target": "rats",
+      "weight": 412
+    },
+    {
+      "source": "rat",
+      "target": "tissue",
+      "weight": 382
+    },
+    {
+      "source": "mouse",
+      "target": "rat",
+      "weight": 356
+    },
+    {
+      "source": "cells",
+      "target": "rat",
+      "weight": 404
+    },
+    {
+      "source": "cell",
+      "target": "mice",
+      "weight": 1662
+    },
+    {
+      "source": "cells",
+      "target": "mice",
+      "weight": 1432
+    },
+    {
+      "source": "cell",
+      "target": "rats",
+      "weight": 474
+    },
+    {
+      "source": "cell",
+      "target": "tissue",
+      "weight": 1966
+    },
+    {
+      "source": "cell",
+      "target": "mouse",
+      "weight": 1386
+    },
+    {
+      "source": "cell",
+      "target": "cells",
+      "weight": 3986
+    },
+    {
+      "source": "rats",
+      "target": "tissue",
+      "weight": 446
+    },
+    {
+      "source": "cells",
+      "target": "rats",
+      "weight": 408
+    },
+    {
+      "source": "cells",
+      "target": "tissue",
+      "weight": 1686
+    },
+    {
+      "source": "cells",
+      "target": "mouse",
+      "weight": 1140
+    },
+    {
+      "source": "radiation",
+      "target": "space",
+      "weight": 1576
+    },
+    {
+      "source": "radiation",
+      "target": "spaceflight",
+      "weight": 1296
+    },
+    {
+      "source": "iss",
+      "target": "spaceflight",
+      "weight": 1434
+    },
+    {
+      "source": "microgravity",
+      "target": "radiation",
+      "weight": 1096
+    },
+    {
+      "source": "iss",
+      "target": "radiation",
+      "weight": 758
+    },
+    {
+      "source": "apoptosis",
+      "target": "muscle",
+      "weight": 178
+    },
+    {
+      "source": "muscle",
+      "target": "regulation",
+      "weight": 362
+    },
+    {
+      "source": "muscle",
+      "target": "proliferation",
+      "weight": 162
+    },
+    {
+      "source": "differentiation",
+      "target": "muscle",
+      "weight": 190
+    },
+    {
+      "source": "apoptosis",
+      "target": "growth",
+      "weight": 270
+    },
+    {
+      "source": "apoptosis",
+      "target": "regulation",
+      "weight": 268
+    },
+    {
+      "source": "apoptosis",
+      "target": "bone",
+      "weight": 180
+    },
+    {
+      "source": "apoptosis",
+      "target": "gene",
+      "weight": 404
+    },
+    {
+      "source": "apoptosis",
+      "target": "proliferation",
+      "weight": 204
+    },
+    {
+      "source": "apoptosis",
+      "target": "expression",
+      "weight": 536
+    },
+    {
+      "source": "apoptosis",
+      "target": "differentiation",
+      "weight": 214
+    },
+    {
+      "source": "growth",
+      "target": "regulation",
+      "weight": 984
+    },
+    {
+      "source": "growth",
+      "target": "proliferation",
+      "weight": 436
+    },
+    {
+      "source": "differentiation",
+      "target": "growth",
+      "weight": 506
+    },
+    {
+      "source": "bone",
+      "target": "regulation",
+      "weight": 392
+    },
+    {
+      "source": "gene",
+      "target": "regulation",
+      "weight": 1362
+    },
+    {
+      "source": "proliferation",
+      "target": "regulation",
+      "weight": 316
+    },
+    {
+      "source": "expression",
+      "target": "regulation",
+      "weight": 1450
+    },
+    {
+      "source": "differentiation",
+      "target": "regulation",
+      "weight": 368
+    },
+    {
+      "source": "bone",
+      "target": "proliferation",
+      "weight": 246
+    },
+    {
+      "source": "bone",
+      "target": "differentiation",
+      "weight": 404
+    },
+    {
+      "source": "gene",
+      "target": "proliferation",
+      "weight": 500
+    },
+    {
+      "source": "differentiation",
+      "target": "gene",
+      "weight": 660
+    },
+    {
+      "source": "expression",
+      "target": "proliferation",
+      "weight": 582
+    },
+    {
+      "source": "differentiation",
+      "target": "proliferation",
+      "weight": 380
+    },
+    {
+      "source": "differentiation",
+      "target": "expression",
+      "weight": 794
+    },
+    {
+      "source": "gene",
+      "target": "protein",
+      "weight": 2304
+    },
+    {
+      "source": "growth",
+      "target": "protein",
+      "weight": 1600
+    },
+    {
+      "source": "protein",
+      "target": "regulation",
+      "weight": 1226
+    },
+    {
+      "source": "bone",
+      "target": "protein",
+      "weight": 436
+    },
+    {
+      "source": "expression",
+      "target": "protein",
+      "weight": 2392
+    },
+    {
+      "source": "drosophila",
+      "target": "mouse",
+      "weight": 42
+    },
+    {
+      "source": "cells",
+      "target": "drosophila",
+      "weight": 186
+    },
+    {
+      "source": "drosophila",
+      "target": "rat",
+      "weight": 16
+    },
+    {
+      "source": "drosophila",
+      "target": "tissue",
+      "weight": 82
+    },
+    {
+      "source": "cell",
+      "target": "drosophila",
+      "weight": 198
+    },
+    {
+      "source": "enzyme",
+      "target": "receptor",
+      "weight": 120
+    },
+    {
+      "source": "apoptosis",
+      "target": "enzyme",
+      "weight": 74
+    },
+    {
+      "source": "enzyme",
+      "target": "regulation",
+      "weight": 182
+    },
+    {
+      "source": "enzyme",
+      "target": "proliferation",
+      "weight": 56
+    },
+    {
+      "source": "differentiation",
+      "target": "enzyme",
+      "weight": 62
+    },
+    {
+      "source": "enzyme",
+      "target": "protein",
+      "weight": 490
+    },
+    {
+      "source": "apoptosis",
+      "target": "receptor",
+      "weight": 174
+    },
+    {
+      "source": "growth",
+      "target": "receptor",
+      "weight": 454
+    },
+    {
+      "source": "receptor",
+      "target": "regulation",
+      "weight": 480
+    },
+    {
+      "source": "bone",
+      "target": "receptor",
+      "weight": 336
+    },
+    {
+      "source": "gene",
+      "target": "receptor",
+      "weight": 728
+    },
+    {
+      "source": "proliferation",
+      "target": "receptor",
+      "weight": 190
+    },
+    {
+      "source": "expression",
+      "target": "receptor",
+      "weight": 878
+    },
+    {
+      "source": "differentiation",
+      "target": "receptor",
+      "weight": 264
+    },
+    {
+      "source": "protein",
+      "target": "receptor",
+      "weight": 686
+    },
+    {
+      "source": "apoptosis",
+      "target": "protein",
+      "weight": 402
+    },
+    {
+      "source": "proliferation",
+      "target": "protein",
+      "weight": 386
+    },
+    {
+      "source": "differentiation",
+      "target": "protein",
+      "weight": 464
+    },
+    {
+      "source": "muscle",
+      "target": "protein",
+      "weight": 656
+    },
+    {
+      "source": "development",
+      "target": "muscle",
+      "weight": 392
+    },
+    {
+      "source": "apoptosis",
+      "target": "development",
+      "weight": 270
+    },
+    {
+      "source": "development",
+      "target": "regulation",
+      "weight": 912
+    },
+    {
+      "source": "bone",
+      "target": "development",
+      "weight": 436
+    },
+    {
+      "source": "development",
+      "target": "gene",
+      "weight": 1580
+    },
+    {
+      "source": "development",
+      "target": "proliferation",
+      "weight": 376
+    },
+    {
+      "source": "development",
+      "target": "expression",
+      "weight": 1614
+    },
+    {
+      "source": "development",
+      "target": "differentiation",
+      "weight": 486
+    },
+    {
+      "source": "development",
+      "target": "protein",
+      "weight": 1288
+    },
+    {
+      "source": "muscle",
+      "target": "receptor",
+      "weight": 280
+    },
+    {
+      "source": "organ",
+      "target": "tissues",
+      "weight": 260
+    },
+    {
+      "source": "cell",
+      "target": "organ",
+      "weight": 596
+    },
+    {
+      "source": "cell",
+      "target": "human",
+      "weight": 2218
+    },
+    {
+      "source": "organ",
+      "target": "tissue",
+      "weight": 388
+    },
+    {
+      "source": "human",
+      "target": "tissue",
+      "weight": 1146
+    },
+    {
+      "source": "human",
+      "target": "organ",
+      "weight": 282
+    },
+    {
+      "source": "cells",
+      "target": "organ",
+      "weight": 480
+    },
+    {
+      "source": "cells",
+      "target": "human",
+      "weight": 1868
+    },
+    {
+      "source": "metabolism",
+      "target": "receptor",
+      "weight": 380
+    },
+    {
+      "source": "development",
+      "target": "metabolism",
+      "weight": 586
+    },
+    {
+      "source": "apoptosis",
+      "target": "metabolism",
+      "weight": 192
+    },
+    {
+      "source": "metabolism",
+      "target": "proliferation",
+      "weight": 198
+    },
+    {
+      "source": "differentiation",
+      "target": "metabolism",
+      "weight": 258
+    },
+    {
+      "source": "development",
+      "target": "receptor",
+      "weight": 484
+    },
+    {
+      "source": "immune",
+      "target": "receptor",
+      "weight": 396
+    },
+    {
+      "source": "development",
+      "target": "immune",
+      "weight": 612
+    },
+    {
+      "source": "apoptosis",
+      "target": "immune",
+      "weight": 246
+    },
+    {
+      "source": "immune",
+      "target": "proliferation",
+      "weight": 254
+    },
+    {
+      "source": "differentiation",
+      "target": "immune",
+      "weight": 288
+    },
+    {
+      "source": "immune",
+      "target": "regulation",
+      "weight": 480
+    },
+    {
+      "source": "immune",
+      "target": "protein",
+      "weight": 768
+    },
+    {
+      "source": "cell",
+      "target": "organs",
+      "weight": 412
+    },
+    {
+      "source": "organ",
+      "target": "organs",
+      "weight": 236
+    },
+    {
+      "source": "human",
+      "target": "organs",
+      "weight": 232
+    },
+    {
+      "source": "cells",
+      "target": "organs",
+      "weight": 358
+    },
+    {
+      "source": "metabolism",
+      "target": "regulation",
+      "weight": 596
+    },
+    {
+      "source": "metabolism",
+      "target": "protein",
+      "weight": 832
+    },
+    {
+      "source": "cell",
+      "target": "humans",
+      "weight": 692
+    },
+    {
+      "source": "humans",
+      "target": "tissue",
+      "weight": 492
+    },
+    {
+      "source": "cells",
+      "target": "humans",
+      "weight": 592
+    },
+    {
+      "source": "humans",
+      "target": "organs",
+      "weight": 110
+    },
+    {
+      "source": "cardiac",
+      "target": "receptor",
+      "weight": 120
+    },
+    {
+      "source": "cardiac",
+      "target": "development",
+      "weight": 166
+    },
+    {
+      "source": "cardiac",
+      "target": "regulation",
+      "weight": 148
+    },
+    {
+      "source": "cardiac",
+      "target": "proliferation",
+      "weight": 78
+    },
+    {
+      "source": "cardiac",
+      "target": "protein",
+      "weight": 230
+    },
+    {
+      "source": "cardiac",
+      "target": "differentiation",
+      "weight": 80
+    },
+    {
+      "source": "mouse",
+      "target": "organ",
+      "weight": 192
+    },
+    {
+      "source": "metabolism",
+      "target": "neural",
+      "weight": 64
+    },
+    {
+      "source": "muscle",
+      "target": "neural",
+      "weight": 68
+    },
+    {
+      "source": "development",
+      "target": "neural",
+      "weight": 142
+    },
+    {
+      "source": "growth",
+      "target": "neural",
+      "weight": 92
+    },
+    {
+      "source": "apoptosis",
+      "target": "neural",
+      "weight": 44
+    },
+    {
+      "source": "bone",
+      "target": "neural",
+      "weight": 72
+    },
+    {
+      "source": "neural",
+      "target": "proliferation",
+      "weight": 76
+    },
+    {
+      "source": "immune",
+      "target": "neural",
+      "weight": 58
+    },
+    {
+      "source": "expression",
+      "target": "neural",
+      "weight": 158
+    },
+    {
+      "source": "differentiation",
+      "target": "neural",
+      "weight": 66
+    },
+    {
+      "source": "enzyme",
+      "target": "neural",
+      "weight": 24
+    },
+    {
+      "source": "gene",
+      "target": "neural",
+      "weight": 138
+    },
+    {
+      "source": "human",
+      "target": "rat",
+      "weight": 380
+    },
+    {
+      "source": "organ",
+      "target": "rat",
+      "weight": 88
+    },
+    {
+      "source": "mice",
+      "target": "organ",
+      "weight": 270
+    },
+    {
+      "source": "cardiac",
+      "target": "neural",
+      "weight": 36
+    },
+    {
+      "source": "neural",
+      "target": "regulation",
+      "weight": 100
+    },
+    {
+      "source": "radiation",
+      "target": "weightlessness",
+      "weight": 128
+    },
+    {
+      "source": "iss",
+      "target": "weightlessness",
+      "weight": 64
+    },
+    {
+      "source": "apoptosis",
+      "target": "cardiac",
+      "weight": 92
+    },
+    {
+      "source": "drosophila",
+      "target": "tissues",
+      "weight": 56
+    },
+    {
+      "source": "drosophila",
+      "target": "mice",
+      "weight": 66
+    },
+    {
+      "source": "drosophila",
+      "target": "rats",
+      "weight": 18
+    },
+    {
+      "source": "drosophila",
+      "target": "organ",
+      "weight": 22
+    },
+    {
+      "source": "drosophila",
+      "target": "human",
+      "weight": 136
+    },
+    {
+      "source": "organ",
+      "target": "rats",
+      "weight": 102
+    },
+    {
+      "source": "humans",
+      "target": "organ",
+      "weight": 120
+    },
+    {
+      "source": "space",
+      "target": "station",
+      "weight": 312
+    },
+    {
+      "source": "spaceflight",
+      "target": "station",
+      "weight": 228
+    },
+    {
+      "source": "microgravity",
+      "target": "station",
+      "weight": 242
+    },
+    {
+      "source": "radiation",
+      "target": "station",
+      "weight": 146
+    },
+    {
+      "source": "station",
+      "target": "weightlessness",
+      "weight": 12
+    },
+    {
+      "source": "solar",
+      "target": "space",
+      "weight": 250
+    },
+    {
+      "source": "solar",
+      "target": "spaceflight",
+      "weight": 176
+    },
+    {
+      "source": "microgravity",
+      "target": "solar",
+      "weight": 152
+    },
+    {
+      "source": "radiation",
+      "target": "solar",
+      "weight": 208
+    },
+    {
+      "source": "iss",
+      "target": "solar",
+      "weight": 116
+    },
+    {
+      "source": "galactic",
+      "target": "space",
+      "weight": 234
+    },
+    {
+      "source": "cosmic",
+      "target": "space",
+      "weight": 354
+    },
+    {
+      "source": "galactic",
+      "target": "spaceflight",
+      "weight": 206
+    },
+    {
+      "source": "cosmic",
+      "target": "spaceflight",
+      "weight": 302
+    },
+    {
+      "source": "cosmic",
+      "target": "galactic",
+      "weight": 236
+    },
+    {
+      "source": "galactic",
+      "target": "solar",
+      "weight": 120
+    },
+    {
+      "source": "galactic",
+      "target": "radiation",
+      "weight": 234
+    },
+    {
+      "source": "galactic",
+      "target": "weightlessness",
+      "weight": 24
+    },
+    {
+      "source": "cosmic",
+      "target": "solar",
+      "weight": 136
+    },
+    {
+      "source": "cosmic",
+      "target": "radiation",
+      "weight": 362
+    },
+    {
+      "source": "cosmic",
+      "target": "weightlessness",
+      "weight": 36
+    },
+    {
+      "source": "solar",
+      "target": "weightlessness",
+      "weight": 32
+    },
+    {
+      "source": "neural",
+      "target": "receptor",
+      "weight": 70
+    },
+    {
+      "source": "humans",
+      "target": "rat",
+      "weight": 148
+    },
+    {
+      "source": "arabidopsis",
+      "target": "cell",
+      "weight": 1086
+    },
+    {
+      "source": "arabidopsis",
+      "target": "humans",
+      "weight": 44
+    },
+    {
+      "source": "arabidopsis",
+      "target": "cells",
+      "weight": 796
+    },
+    {
+      "source": "gene",
+      "target": "hormone",
+      "weight": 350
+    },
+    {
+      "source": "expression",
+      "target": "hormone",
+      "weight": 362
+    },
+    {
+      "source": "growth",
+      "target": "hormone",
+      "weight": 352
+    },
+    {
+      "source": "arabidopsis",
+      "target": "tissues",
+      "weight": 296
+    },
+    {
+      "source": "arabidopsis",
+      "target": "organs",
+      "weight": 132
+    },
+    {
+      "source": "arabidopsis",
+      "target": "tissue",
+      "weight": 406
+    },
+    {
+      "source": "arabidopsis",
+      "target": "human",
+      "weight": 152
+    },
+    {
+      "source": "neural",
+      "target": "protein",
+      "weight": 110
+    },
+    {
+      "source": "development",
+      "target": "hormone",
+      "weight": 224
+    },
+    {
+      "source": "hormone",
+      "target": "protein",
+      "weight": 310
+    },
+    {
+      "source": "arabidopsis",
+      "target": "mouse",
+      "weight": 42
+    },
+    {
+      "source": "arabidopsis",
+      "target": "organ",
+      "weight": 188
+    },
+    {
+      "source": "hormone",
+      "target": "metabolism",
+      "weight": 222
+    },
+    {
+      "source": "enzyme",
+      "target": "hormone",
+      "weight": 36
+    },
+    {
+      "source": "hormone",
+      "target": "receptor",
+      "weight": 190
+    },
+    {
+      "source": "hormone",
+      "target": "regulation",
+      "weight": 250
+    },
+    {
+      "source": "hormone",
+      "target": "immune",
+      "weight": 120
+    },
+    {
+      "source": "drosophila",
+      "target": "humans",
+      "weight": 62
+    },
+    {
+      "source": "galactic",
+      "target": "microgravity",
+      "weight": 154
+    },
+    {
+      "source": "galactic",
+      "target": "station",
+      "weight": 20
+    },
+    {
+      "source": "galactic",
+      "target": "iss",
+      "weight": 104
+    },
+    {
+      "source": "cosmic",
+      "target": "microgravity",
+      "weight": 240
+    },
+    {
+      "source": "cosmic",
+      "target": "station",
+      "weight": 22
+    },
+    {
+      "source": "cosmic",
+      "target": "iss",
+      "weight": 162
+    },
+    {
+      "source": "solar",
+      "target": "station",
+      "weight": 22
+    },
+    {
+      "source": "iss",
+      "target": "station",
+      "weight": 218
+    },
+    {
+      "source": "organs",
+      "target": "rat",
+      "weight": 62
+    },
+    {
+      "source": "organs",
+      "target": "rats",
+      "weight": 48
+    },
+    {
+      "source": "bone",
+      "target": "hormone",
+      "weight": 210
+    },
+    {
+      "source": "apoptosis",
+      "target": "hormone",
+      "weight": 50
+    },
+    {
+      "source": "development",
+      "target": "enzyme",
+      "weight": 168
+    },
+    {
+      "source": "arabidopsis",
+      "target": "mice",
+      "weight": 50
+    },
+    {
+      "source": "drosophila",
+      "target": "organs",
+      "weight": 14
+    },
+    {
+      "source": "cell",
+      "target": "zebrafish",
+      "weight": 56
+    },
+    {
+      "source": "drosophila",
+      "target": "zebrafish",
+      "weight": 8
+    },
+    {
+      "source": "mouse",
+      "target": "zebrafish",
+      "weight": 26
+    },
+    {
+      "source": "human",
+      "target": "zebrafish",
+      "weight": 42
+    },
+    {
+      "source": "differentiation",
+      "target": "hormone",
+      "weight": 134
+    },
+    {
+      "source": "arabidopsis",
+      "target": "rat",
+      "weight": 14
+    },
+    {
+      "source": "hormone",
+      "target": "neural",
+      "weight": 22
+    },
+    {
+      "source": "hormone",
+      "target": "muscle",
+      "weight": 90
+    },
+    {
+      "source": "cardiac",
+      "target": "hormone",
+      "weight": 22
+    },
+    {
+      "source": "cells",
+      "target": "zebrafish",
+      "weight": 42
+    },
+    {
+      "source": "organ",
+      "target": "zebrafish",
+      "weight": 6
+    },
+    {
+      "source": "arabidopsis",
+      "target": "drosophila",
+      "weight": 26
+    },
+    {
+      "source": "rat",
+      "target": "zebrafish",
+      "weight": 6
+    },
+    {
+      "source": "organs",
+      "target": "zebrafish",
+      "weight": 6
+    },
+    {
+      "source": "mice",
+      "target": "zebrafish",
+      "weight": 20
+    },
+    {
+      "source": "tissue",
+      "target": "zebrafish",
+      "weight": 22
+    },
+    {
+      "source": "hormone",
+      "target": "proliferation",
+      "weight": 88
+    },
+    {
+      "source": "humans",
+      "target": "zebrafish",
+      "weight": 12
+    },
+    {
+      "source": "tissues",
+      "target": "zebrafish",
+      "weight": 12
+    },
+    {
+      "source": "arabidopsis",
+      "target": "zebrafish",
+      "weight": 2
+    },
+    {
+      "source": "arabidopsis",
+      "target": "rats",
+      "weight": 6
+    }
+  ],
+  "metadata": {
+    "total_entities": 43,
+    "total_relationships": 302,
+    "generated_at": "2025-10-04T22:30:07.431854"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "total_documents": 607,
+  "total_chunks": 5427,
+  "year_distribution": {},
+  "top_keywords": [
+    {
+      "term": "spaceflight",
+      "score": 0.11047890412601209
+    },
+    {
+      "term": "space",
+      "score": 0.10242615609813374
+    },
+    {
+      "term": "microgravity",
+      "score": 0.045175765281325206
+    },
+    {
+      "term": "bone",
+      "score": 0.04414861450439823
+    },
+    {
+      "term": "effects",
+      "score": 0.04295277691851036
+    },
+    {
+      "term": "arabidopsis",
+      "score": 0.040055414450363994
+    },
+    {
+      "term": "international",
+      "score": 0.03833730486623892
+    },
+    {
+      "term": "mice",
+      "score": 0.03757028247836374
+    },
+    {
+      "term": "cell",
+      "score": 0.03733930675253624
+    },
+    {
+      "term": "space station",
+      "score": 0.037090425223032776
+    },
+    {
+      "term": "international space",
+      "score": 0.037090425223032776
+    },
+    {
+      "term": "station",
+      "score": 0.037090425223032776
+    },
+    {
+      "term": "response",
+      "score": 0.03613465070878916
+    },
+    {
+      "term": "plant",
+      "score": 0.03247602915607619
+    },
+    {
+      "term": "radiation",
+      "score": 0.031776172695534746
+    },
+    {
+      "term": "stress",
+      "score": 0.03079094219649534
+    },
+    {
+      "term": "cells",
+      "score": 0.029253247975416664
+    },
+    {
+      "term": "expression",
+      "score": 0.029194952725691812
+    },
+    {
+      "term": "muscle",
+      "score": 0.026851312264977233
+    },
+    {
+      "term": "mouse",
+      "score": 0.026785456624175894
+    }
+  ],
+  "generated_at": "2025-10-04T22:29:41.398495",
+  "manifest": {
+    "title_column": "Title",
+    "year_column": null,
+    "url_column": "Link",
+    "id_column": null,
+    "content_column": null,
+    "detected_columns": [
+      "Title",
+      "Link"
+    ],
+    "total_rows": 607
+  },
+  "crawling_stats": {
+    "total_attempted": 607,
+    "successful_crawls": 607,
+    "csv_fallback": 607,
+    "failed_crawls": 0
+  }
+}

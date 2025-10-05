@@ -1,0 +1,12 @@
+{
+  "title_column": "Title",
+  "year_column": null,
+  "url_column": "Link",
+  "id_column": null,
+  "content_column": null,
+  "detected_columns": [
+    "Title",
+    "Link"
+  ],
+  "total_rows": 607
+}

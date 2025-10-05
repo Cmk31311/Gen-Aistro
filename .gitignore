@@ -33,7 +33,6 @@ pids
 *.pid.lock
 
 # Data files
-public/data/
 SB_publication_PMC.csv
 
 # Python
