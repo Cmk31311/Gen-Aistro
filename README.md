@@ -55,10 +55,10 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 │  • Search History     • Topic Analysis     • Detailed Reports   │
 │  • Example Questions  • Link Coverage      • Research Trends    │
 ├─────────────────────────────────────────────────────────────────┤
-│  📚 Publications Tab  │  🎨 UI Components  │  📱 Responsive     │
-│  • Browse 607 Papers │  • Glassmorphism   │  • Mobile Ready   │
-│  • Simple Search     │  • Space Theme     │  • Touch Friendly │
-│  • Direct Links      │  • Animations      │  • Cross Platform│
+│  📚 Publications Tab  │  🎨 UI Components  │  📱 Responsive      │
+│  • Browse 607 Papers │  • Glassmorphism   │  • Mobile Ready     │
+│  • Simple Search     │  • Space Theme     │  • Touch Friendly   │
+│  • Direct Links      │  • Animations      │  • Cross Platform   │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -348,7 +348,7 @@ curl http://localhost:3000/api/health
 - Implement caching for frequently accessed data
 - Monitor API rate limits and usage
 - Optimize embedding dimensions if needed
-- Adjust crawling workers based on target server capacity
+- Adjust crawling workers based on the target server capacity
 
 ### Crawling Troubleshooting
 
@@ -363,7 +363,7 @@ curl http://localhost:3000/api/health
 - Use environment variables for sensitive data
 - Implement rate limiting for production use
 - Validate all user inputs
-- Respect robots.txt and site terms of service
+- Respect robots.txt and site's terms of service
 - Use polite crawling practices
 
 ## 📊 Monitoring
