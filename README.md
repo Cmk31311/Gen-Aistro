@@ -1,5 +1,7 @@
 # 🚀 Gen-Aistro — NASA Space Biology Knowledge Engine
 
+**🌐 Live Demo**: [https://gen-aistro.vercel.app/](https://gen-aistro.vercel.app/)
+
 Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard that allows users to explore NASA Space Biology research. It uses preprocessed embeddings, client-side query embeddings, serverless retrieval, and Groq's `llama-3.3-70b-versatile` model for fast, accurate question answering.
 
 ## ✨ Features
@@ -46,12 +48,12 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 ┌─────────────────────────────────────────────────────────────────┐
 │                        CLIENT SIDE (Next.js)                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  🔍 Search Tab        📊 Analytics Tab    💡 Insights Tab      │
-│  • Query Embedding    • Interactive Charts • AI Insights       │
-│  • Citation Gen       • Timeline Viz       • Confidence Scores │
-│  • Share Results      • Organism Analysis  • Impact Assessment│
-│  • Search History     • Topic Analysis     • Detailed Reports │
-│  • Example Questions  • Link Coverage      • Research Trends │
+│  🔍 Search Tab        📊 Analytics Tab    💡 Insights Tab        │
+│  • Query Embedding    • Interactive Charts • AI Insights        │
+│  • Citation Gen       • Timeline Viz       • Confidence Scores  │
+│  • Share Results      • Organism Analysis  • Impact Assessment  │
+│  • Search History     • Topic Analysis     • Detailed Reports   │
+│  • Example Questions  • Link Coverage      • Research Trends    │
 ├─────────────────────────────────────────────────────────────────┤
 │  📚 Publications Tab  │  🎨 UI Components  │  📱 Responsive     │
 │  • Browse 607 Papers │  • Glassmorphism   │  • Mobile Ready   │
@@ -63,38 +65,40 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    VERCEL SERVERLESS API                        │
 ├─────────────────────────────────────────────────────────────────┤
-│  /api/search    /api/ask      /api/graph    /api/health        │
-│  • Cosine Sim   • LLM Gen     • Graph Data  • System Status    │
-│  • MMR Diversify• Streaming   • Node/Links  • Performance     │
-│  • Filtering    • Citations   • Analytics  • Health Check     │
-│  • Caching      • Web Search  • Stats      • Monitoring       │
+│  /api/search    /api/ask      /api/graph    /api/health         │
+│  • Cosine Sim   • LLM Gen     • Graph Data  • System Status     │
+│  • MMR Diversify• Streaming   • Node/Links  • Performance       │
+│  • Filtering    • Citations   • Analytics  • Health Check       │
+│  • Caching      • Web Search  • Stats      • Monitoring         │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      EXTERNAL SERVICES                          │
 ├─────────────────────────────────────────────────────────────────┤
-│  🤖 Groq API           🌐 Web Search API    📊 Data Sources    │
-│  • Llama-3.3-70B      • DuckDuckGo        • NASA Publications │
-│  • Fast Inference      • Instant Answers   • PMC/DOI Links    │
-│  • Rate Limiting       • Fallback Context  • Research Data     │
-│  • Streaming Response  • Additional Info   • Metadata          │
+│  🤖 Groq API           🌐 Web Search API    📊 Data Sources      │
+│  • Llama-3.3-70B      • DuckDuckGo        • NASA Publications   │
+│  • Fast Inference      • Instant Answers   • PMC/DOI Links      │
+│  • Rate Limiting       • Fallback Context  • Research Data      │
+│  • Streaming Response  • Additional Info   • Metadata           │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      DATA LAYER                                 │
 ├─────────────────────────────────────────────────────────────────┤
-│  📄 Static Files       🔄 Processing Pipeline  📊 Analytics    │
-│  • papers.json (93MB)  • Python Scripts        • Real-time     │
-│  • stats.json          • Web Crawling          • Interactive   │
-│  • graph.json          • Text Extraction      • Dynamic       │
-│  • manifest.json       • Chunking & Embedding • Responsive    │
-│  • failed_crawls.csv   • Knowledge Graph      • Performance   │
+│  📄 Static Files       🔄 Processing Pipeline  📊 Analytics      │
+│  • papers.json (93MB)  • Python Scripts        • Real-time      │
+│  • stats.json          • Web Crawling          • Interactive    │
+│  • graph.json          • Text Extraction      • Dynamic         │
+│  • manifest.json       • Chunking & Embedding • Responsive      │
+│  • failed_crawls.csv   • Knowledge Graph      • Performance     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ## 🚀 Quick Start
+
+**🌐 Try the Live Demo**: [https://gen-aistro.vercel.app/](https://gen-aistro.vercel.app/)
 
 ### 1. Prerequisites
 
@@ -166,6 +170,8 @@ vercel env add GROQ_API_KEY
 ```
 
 ## 🎯 Demo Features
+
+**🌐 Experience the full application**: [https://gen-aistro.vercel.app/](https://gen-aistro.vercel.app/)
 
 ### Search Tab
 - **Try Example Questions**: Click pre-built questions to get started
