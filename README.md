@@ -1,17 +1,46 @@
-# 🧠 Gen-Aistro — NASA Space Biology Knowledge Engine
+# 🚀 Gen-Aistro — NASA Space Biology Knowledge Engine
 
 Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard that allows users to explore NASA Space Biology research. It uses preprocessed embeddings, client-side query embeddings, serverless retrieval, and Groq's `llama-3.3-70b-versatile` model for fast, accurate question answering.
 
 ## ✨ Features
 
-- 🔍 **Semantic Search**: Find relevant research papers using natural language queries
-- 🤖 **AI-Powered Answers**: Get grounded responses with inline citations
-- 📊 **Data Insights**: Visualize dataset statistics and publication trends  
-- 🕸️ **Knowledge Graph**: Explore entity relationships in space biology research
-- ⚡ **Real-time Processing**: Client-side embeddings with serverless retrieval
-- 🎯 **Production Ready**: Rate limiting, caching, error handling, and monitoring
-- 🌐 **Full-Text Crawling**: Automatically extracts complete text from publication URLs
-- 📚 **Enhanced Metadata**: Rich document metadata with proper citations
+### 🔍 **Advanced Search & AI**
+- **Semantic Search**: Find relevant research papers using natural language queries
+- **AI-Powered Answers**: Get grounded responses with inline citations
+- **Citation Generator**: Export citations in APA, MLA, and Chicago formats
+- **Share Results**: Native sharing API with clipboard fallback
+- **Search History**: Quick access to recent queries
+- **Example Questions**: Pre-built queries to help users get started
+
+### 📊 **Analytics Dashboard**
+- **Interactive Charts**: Timeline visualization of publications over time
+- **Organism Analysis**: Research organism distribution with animated charts
+- **Topic Analysis**: Research topic frequency with color-coded metrics
+- **Link Coverage**: Publication accessibility statistics
+- **Real-time Data**: Dynamic visualizations based on actual research data
+
+### 💡 **AI-Powered Insights**
+- **Smart Insights**: AI-generated research patterns and trends
+- **Confidence Scoring**: Each insight has confidence levels (80-95%)
+- **Impact Assessment**: High/Medium/Low impact categorization
+- **Detailed Analysis**: Click insights for comprehensive analysis with supporting data
+- **Research Trends**: Discover collaboration patterns and technology adoption
+
+### 📚 **Publication Management**
+- **607 Publications**: Complete NASA Space Biology research database
+- **Advanced Filtering**: Search by title, ID, year, organism, and link status
+- **Multiple Views**: Grid, list, and compact viewing modes
+- **Bookmark System**: Save favorite publications
+- **Export Functionality**: CSV export with bookmarks and metadata
+- **Direct Links**: Click to open publications in new tabs
+
+### ⚡ **Technical Excellence**
+- **Real-time Processing**: Client-side embeddings with serverless retrieval
+- **Production Ready**: Rate limiting, caching, error handling, and monitoring
+- **Full-Text Crawling**: Automatically extracts complete text from publication URLs
+- **Enhanced Metadata**: Rich document metadata with proper citations
+- **Modern UI**: Space galaxy theme with glassmorphism design
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
 
 ## 🏗️ Architecture
 
@@ -44,15 +73,12 @@ Gen-Aistro is a production-ready Retrieval-Augmented Generation (RAG) dashboard 
 
 ### 2. Install Dependencies
 
-```bash
+   ```bash
 # Install Node.js dependencies
-npm install
+   npm install
 
 # Install Python dependencies
 pip install -r scripts/requirements.txt
-
-# Download spaCy model (optional, for knowledge graph)
-python -m spacy download en_core_web_sm
 ```
 
 ### 3. Data Preprocessing
@@ -79,7 +105,7 @@ python scripts/preprocess.py SB_publication_PMC.csv --skip-crawling --build-grap
 
 ### 4. Environment Setup
 
-```bash
+   ```bash
 # Copy environment template
 cp .env.example .env
 
@@ -89,9 +115,9 @@ echo "GROQ_API_KEY=your_groq_api_key_here" >> .env
 
 ### 5. Run Locally
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) to access the dashboard.
 
@@ -107,6 +133,32 @@ vercel
 # Set environment variable
 vercel env add GROQ_API_KEY
 ```
+
+## 🎯 Demo Features
+
+### Search Tab
+- **Try Example Questions**: Click pre-built questions to get started
+- **AI Answers**: Get comprehensive answers with citations
+- **Citation Export**: Generate APA, MLA, and Chicago citations
+- **Share Results**: Share findings with colleagues
+
+### Analytics Tab
+- **Timeline Charts**: See publication trends over time
+- **Organism Analysis**: Discover research focus areas
+- **Topic Visualization**: Explore research themes
+- **Link Coverage**: Understand data accessibility
+
+### Insights Tab
+- **AI Discoveries**: Uncover hidden research patterns
+- **Confidence Metrics**: Trust the insights with confidence scores
+- **Impact Analysis**: Understand research significance
+- **Detailed Reports**: Deep dive into supporting data
+
+### Publications Tab
+- **Browse All**: Explore all 607 NASA publications
+- **Quick Search**: Find specific papers instantly
+- **Direct Access**: Click to open papers in new tabs
+- **Clean Interface**: Simple, focused browsing experience
 
 ## 🔧 Enhanced Data Pipeline
 
@@ -148,10 +200,11 @@ Gen-Aistro/
 │   ├── api/               # Serverless functions
 │   │   ├── search/        # Semantic search endpoint
 │   │   ├── ask/           # LLM generation endpoint
+│   │   ├── graph/         # Knowledge graph endpoint
 │   │   └── health/        # Health check endpoint
-│   ├── page.jsx           # Main dashboard UI
+│   ├── page.jsx           # Main dashboard UI with 4 tabs
 │   ├── layout.jsx         # Root layout
-│   └── globals.css        # Global styles
+│   └── globals.css        # Global styles with space theme
 ├── scripts/               # Data preprocessing
 │   ├── preprocess.py      # Enhanced preprocessing script
 │   ├── smoke_test.py      # Corpus validation
@@ -167,6 +220,34 @@ Gen-Aistro/
 │   └── failed_crawls.csv # Crawling failure log
 └── README.md             # This file
 ```
+
+## 🏆 Hackathon Features
+
+### 🎯 **What Makes This Special**
+
+This NASA Space Biology Knowledge Engine showcases cutting-edge AI and data visualization techniques:
+
+- **Advanced RAG Pipeline**: Combines semantic search with LLM generation
+- **Real-time Analytics**: Interactive charts and data visualizations
+- **AI-Powered Insights**: Machine learning-driven research pattern discovery
+- **Professional UI/UX**: Modern space-themed interface with glassmorphism design
+- **Production Ready**: Scalable architecture with proper error handling
+
+### 🚀 **Demo Highlights**
+
+1. **Ask Complex Questions**: "What are the effects of microgravity on plant growth?"
+2. **Explore Analytics**: Interactive timeline showing 20+ years of research
+3. **Discover Insights**: AI reveals hidden patterns in NASA research
+4. **Export Citations**: Generate proper academic citations
+5. **Share Findings**: Collaborate with research teams
+
+### 🎨 **Technical Innovation**
+
+- **Client-side Embeddings**: Reduces server load and improves performance
+- **Serverless Architecture**: Scales automatically with user demand
+- **Advanced Chunking**: Preserves semantic meaning across document boundaries
+- **Smart Caching**: Optimizes response times for better user experience
+- **Responsive Design**: Works seamlessly across all devices
 
 ## ⚙️ Configuration
 
@@ -271,9 +352,23 @@ MIT License - see LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- NASA Space Biology Program
-- Groq for LLM infrastructure
-- Next.js and Vercel for deployment platform
-- Sentence Transformers for embeddings
-- BeautifulSoup and readability for HTML processing
-- PyPDF2 and pdfplumber for PDF extraction
+- **NASA Space Biology Program** for providing the research data
+- **Groq** for high-performance LLM infrastructure
+- **Next.js and Vercel** for modern web development and deployment
+- **Tailwind CSS** for beautiful, responsive UI design
+- **React** for interactive user interfaces
+- **Sentence Transformers** for semantic embeddings
+- **BeautifulSoup and readability** for HTML processing
+- **PyPDF2 and pdfplumber** for PDF extraction
+- **Python** for robust data processing pipeline
+
+## 🌟 Built for Hackathons
+
+This project demonstrates:
+- **Full-stack AI application** development
+- **Modern web technologies** and best practices
+- **Data science** and machine learning integration
+- **User experience** design and accessibility
+- **Production deployment** and scaling considerations
+
+Perfect for showcasing technical skills and innovation in AI/ML hackathons! 🚀
