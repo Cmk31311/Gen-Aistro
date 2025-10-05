@@ -1,0 +1,13 @@
+pandas
+sentence-transformers
+tqdm
+scikit-learn
+numpy
+spacy
+scispacy
+requests
+beautifulsoup4
+PyPDF2
+pdfplumber
+readability-lxml
+python-dateutil
