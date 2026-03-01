@@ -129,15 +129,26 @@ function validateInput(question, chunks, temperature, maxTokens) {
   if (!question || typeof question !== 'string' || question.trim().length === 0) {
     throw new Error('Question is required and must be a non-empty string');
   }
-  
+
+  if (question.length > 2000) {
+    throw new Error('Question too long (max 2000 characters)');
+  }
+
   if (!chunks || !Array.isArray(chunks) || chunks.length === 0) {
     throw new Error('Chunks are required and must be a non-empty array');
   }
-  
+
+  if (chunks.length > 20) {
+    throw new Error('Too many chunks (max 20)');
+  }
+
   // Validate chunk structure
   for (const chunk of chunks) {
     if (!chunk.text || !chunk.doc_title) {
       throw new Error('Each chunk must have text and doc_title');
+    }
+    if (chunk.text.length > 10000) {
+      throw new Error('Chunk text too long (max 10000 characters)');
     }
   }
   
@@ -150,22 +161,33 @@ function validateInput(question, chunks, temperature, maxTokens) {
   }
 }
 
+const STOP_WORDS = new Set([
+  'what','how','does','the','and','for','are','was','with','that','this',
+  'from','have','been','will','about','into','over','after','also','than',
+  'more','some','when','where','which','their','there','would','could',
+  'should','other','these','those','they','them','then','were','being',
+  'each','make','like','just','know','take','come','made','find','here',
+  'many','most','very','only','your','used','using','such','between'
+]);
+
 async function checkContextSufficiency(question, chunks) {
-  // Simple heuristic to check if context is sufficient
   const questionWords = question.toLowerCase().split(/\s+/);
   const contextText = chunks.map(chunk => chunk.text.toLowerCase()).join(' ');
-  
-  // Check for key terms in context
+
+  // Filter out stop words and short words
+  const importantWords = questionWords.filter(w => w.length > 3 && !STOP_WORDS.has(w));
+
+  if (importantWords.length === 0) return true; // All stop words = general question, context is fine
+
   let relevantTerms = 0;
-  const importantWords = questionWords.filter(word => word.length > 3); // Skip short words
-  
   for (const word of importantWords) {
-    if (contextText.includes(word)) {
+    // Use word boundary regex instead of substring .includes()
+    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    if (regex.test(contextText)) {
       relevantTerms++;
     }
   }
-  
-  // If less than 30% of important words are found in context, consider it insufficient
+
   const sufficiencyRatio = relevantTerms / Math.max(importantWords.length, 1);
   return sufficiencyRatio >= 0.3;
 }

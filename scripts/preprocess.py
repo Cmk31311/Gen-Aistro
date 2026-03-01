@@ -215,7 +215,7 @@ def extract_year(row: pd.Series) -> Optional[int]:
                 year_match = re.search(r'\b(19|20)\d{2}\b', date_val)
                 if year_match:
                     year = int(year_match.group())
-                    if 1950 <= year <= 2025:  # Reasonable range
+                    if 1950 <= year <= datetime.now().year + 1:
                         return year
             except (ValueError, TypeError):
                 continue

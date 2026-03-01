@@ -3,27 +3,18 @@ import fs from 'fs';
 import path from 'path';
 import { cosineSimilarity } from '../../../utils/cosine';
 
-// Cache for papers data (loaded once per cold start)
+// Cache for papers data (loaded once, persists for lifetime of process)
 let papersCache = null;
-let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 function loadPapers() {
-  const now = Date.now();
-  
-  // Return cached data if still valid
-  if (papersCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
-    return papersCache;
-  }
-  
+  if (papersCache) return papersCache;
+
   try {
     const filePath = path.join(process.cwd(), 'public/data/papers.json');
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    
+
     papersCache = data;
-    cacheTimestamp = now;
-    
-    console.log(`✅ Loaded ${data.length} papers from cache`);
+    console.log(`Loaded ${data.length} papers into memory`);
     return data;
   } catch (error) {
     console.error('Error loading papers:', error);
