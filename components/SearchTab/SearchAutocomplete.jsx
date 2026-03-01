@@ -8,6 +8,7 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [terms, setTerms] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
   const debouncedValue = useDebounce(value, 200);
   const wrapperRef = useRef(null);
 
@@ -38,6 +39,7 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
     const handleClick = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
         setShowSuggestions(false);
+        setIsFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -68,25 +70,26 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <SearchIcon size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-3 pointer-events-none" />
+        <SearchIcon size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 ${isFocused ? 'text-accent' : 'text-accent/40'}`} />
         <textarea
           ref={inputRef}
           value={value}
           onChange={(e) => { onChange(e.target.value); setShowSuggestions(true); }}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => { setShowSuggestions(true); setIsFocused(true); }}
+          onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
           placeholder="Ask a question about NASA Space Biology research..."
-          className="w-full pl-10 pr-4 py-3.5 bg-bg border border-border rounded-xl text-content-1 text-base placeholder-content-3 focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/15 resize-none transition-colors"
+          className="w-full pl-11 pr-4 py-4 bg-bg border border-border rounded-xl text-content-1 text-base placeholder-content-3 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 focus:shadow-glow resize-none transition-all"
           rows={2}
         />
       </div>
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-30 w-full mt-1 bg-surface-1 rounded-lg border border-border shadow-xl shadow-black/50 overflow-hidden">
+        <div className="absolute z-30 w-full mt-1.5 bg-surface-1 rounded-xl border border-border shadow-xl shadow-black/50 overflow-hidden">
           {suggestions.map((term, i) => (
             <button
               key={term}
-              className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
-                i === selectedIndex ? 'bg-surface-2 text-content-1' : 'text-content-2 hover:bg-surface-2 hover:text-content-1'
+              className={`w-full px-4 py-3 text-left text-sm transition-all ${
+                i === selectedIndex ? 'bg-accent-muted text-accent' : 'text-content-2 hover:bg-surface-2 hover:text-content-1'
               }`}
               onClick={() => {
                 const words = value.split(' ');

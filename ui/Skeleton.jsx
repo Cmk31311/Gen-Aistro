@@ -13,10 +13,11 @@ export function Skeleton({ className = '', variant = 'rect' }) {
 export function SearchSkeleton() {
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="bg-surface-1 rounded-xl border border-border p-6">
-        <Skeleton className="h-5 w-24 mb-4" />
-        <Skeleton className="h-12 w-full mb-4" />
-        <Skeleton className="h-10 w-28" />
+      <div className="bg-surface-1 rounded-xl border border-border p-7 shadow-card">
+        <Skeleton className="h-6 w-28 mb-2" />
+        <Skeleton className="h-4 w-48 mb-5" />
+        <Skeleton className="h-14 w-full mb-5 rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-lg" />
       </div>
     </div>
   );
@@ -25,14 +26,14 @@ export function SearchSkeleton() {
 export function PublicationGridSkeleton() {
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="bg-surface-1 rounded-xl border border-border p-6">
-        <Skeleton className="h-6 w-40 mb-4" />
-        <Skeleton className="h-10 w-full mb-6" />
+      <div className="bg-surface-1 rounded-xl border border-border p-7 shadow-card">
+        <Skeleton className="h-7 w-44 mb-4" />
+        <Skeleton className="h-11 w-full mb-6 rounded-xl" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="bg-surface-1 rounded-xl border border-border p-5">
-            <Skeleton className="h-5 w-full mb-2" />
+          <div key={i} className="bg-surface-1 rounded-xl border border-border p-5 shadow-card">
+            <Skeleton className="h-5 w-full mb-3" />
             <Skeleton className="h-4 w-3/4 mb-3" />
             <Skeleton className="h-3 w-1/2" />
           </div>
@@ -47,17 +48,17 @@ export function AnalyticsSkeleton() {
     <div className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-surface-1 rounded-xl border border-border p-5">
-            <Skeleton className="h-8 w-16 mb-2" />
+          <div key={i} className="bg-surface-1 rounded-xl border border-border p-6 shadow-card">
+            <Skeleton className="h-9 w-16 mb-2" />
             <Skeleton className="h-3 w-24" />
           </div>
         ))}
       </div>
-      <div className="bg-surface-1 rounded-xl border border-border p-6">
+      <div className="bg-surface-1 rounded-xl border border-border p-7 shadow-card">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center space-x-4 mb-3">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 flex-1" />
+          <div key={i} className="flex items-center space-x-4 mb-4">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-6 flex-1 rounded-full" />
           </div>
         ))}
       </div>
@@ -68,17 +69,17 @@ export function AnalyticsSkeleton() {
 export function InsightsSkeleton() {
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="bg-surface-1 rounded-xl border border-border p-6">
-        <Skeleton className="h-6 w-32 mb-2" />
-        <Skeleton className="h-4 w-48 mb-6" />
+      <div className="bg-surface-1 rounded-xl border border-border p-7 shadow-card">
+        <Skeleton className="h-7 w-36 mb-2" />
+        <Skeleton className="h-4 w-56 mb-7" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="bg-bg rounded-xl border border-border p-5">
               <Skeleton className="h-3 w-16 mb-3" />
-              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-5 w-full mb-3" />
               <Skeleton className="h-3 w-full mb-1" />
-              <Skeleton className="h-3 w-2/3 mb-4" />
-              <Skeleton className="h-1 w-full" />
+              <Skeleton className="h-3 w-2/3 mb-5" />
+              <Skeleton className="h-1.5 w-full rounded-full" />
             </div>
           ))}
         </div>

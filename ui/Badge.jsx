@@ -2,7 +2,7 @@
 
 const VARIANTS = {
   default: 'bg-surface-2 text-content-2 border-border',
-  accent: 'bg-accent-muted text-accent border-[#D4A853]/20',
+  accent: 'bg-accent-muted text-accent border-accent/25',
   success: 'bg-green-500/10 text-green-400 border-green-500/20',
   danger: 'bg-red-500/10 text-red-400 border-red-500/20',
   warning: 'bg-amber-500/10 text-amber-400 border-amber-500/20',

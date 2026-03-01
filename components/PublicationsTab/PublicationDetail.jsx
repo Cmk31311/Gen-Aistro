@@ -24,28 +24,28 @@ export default function PublicationDetail({ publication, onClose }) {
   }, [publication, publications]);
 
   return (
-    <div className="mt-6 bg-surface-1 rounded-xl border border-border p-6 animate-slide-up">
+    <div className="mt-6 bg-surface-1 rounded-xl border border-border p-7 animate-slide-up shadow-card">
       <div className="flex items-start justify-between mb-6">
         <div className="flex-1 mr-4">
-          <h3 className="text-lg font-semibold text-content-1 tracking-tight">{publication.title}</h3>
-          <p className="text-content-3 text-sm mt-1">ID: {publication.id}</p>
+          <h3 className="text-lg font-bold text-gradient-gold tracking-tight">{publication.title}</h3>
+          <p className="text-content-3 text-sm mt-1.5">ID: {publication.id}</p>
         </div>
         <div className="flex items-center space-x-1 flex-shrink-0">
-          <button onClick={() => togglePaperBookmark(publication)} className={`p-2 rounded-lg transition-colors ${bookmarked ? 'text-accent bg-accent-muted' : 'text-content-3 hover:text-accent hover:bg-surface-2'}`}>
+          <button onClick={() => togglePaperBookmark(publication)} className={`p-2 rounded-lg transition-all ${bookmarked ? 'text-accent bg-accent-muted' : 'text-content-3 hover:text-accent hover:bg-surface-2'}`}>
             {bookmarked ? <StarFilledIcon size={16} /> : <StarIcon size={16} />}
           </button>
           {publication.url && (
-            <button onClick={() => window.open(publication.url, '_blank', 'noopener,noreferrer')} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-colors">
+            <button onClick={() => window.open(publication.url, '_blank', 'noopener,noreferrer')} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all">
               <ExternalLinkIcon size={16} />
             </button>
           )}
-          <button onClick={onClose} className="p-2 rounded-lg text-content-3 hover:text-content-1 hover:bg-surface-2 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-lg text-content-3 hover:text-content-1 hover:bg-surface-2 transition-all">
             <CloseIcon size={16} />
           </button>
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Year', value: publication.year || 'N/A' },
@@ -53,19 +53,19 @@ export default function PublicationDetail({ publication, onClose }) {
             { label: 'Status', value: publication.url ? 'Online' : 'Metadata only' },
             { label: 'ID', value: publication.id },
           ].map(({ label, value }) => (
-            <div key={label}>
-              <div className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-0.5">{label}</div>
-              <div className="text-sm text-content-2">{value}</div>
+            <div key={label} className="p-3 bg-bg rounded-lg border border-border">
+              <div className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-1 font-medium">{label}</div>
+              <div className="text-sm text-content-1 font-medium">{value}</div>
             </div>
           ))}
         </div>
 
         {keyTerms.length > 0 && (
           <div>
-            <h4 className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-2">Key Terms</h4>
-            <div className="flex flex-wrap gap-1.5">
+            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Key Terms</h4>
+            <div className="flex flex-wrap gap-2">
               {keyTerms.map(term => (
-                <span key={term} className="px-2.5 py-0.5 bg-surface-2 text-content-2 rounded-md text-xs border border-border">{term}</span>
+                <span key={term} className="px-3 py-1 bg-accent-muted text-accent rounded-lg text-xs border border-accent/20 font-medium">{term}</span>
               ))}
             </div>
           </div>
@@ -73,17 +73,17 @@ export default function PublicationDetail({ publication, onClose }) {
 
         {abstract && (
           <div>
-            <h4 className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-2">Text Preview</h4>
+            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Text Preview</h4>
             <p className="text-content-2 text-sm leading-relaxed">{abstract}...</p>
           </div>
         )}
 
         {bookmarks.readingLists.length > 0 && (
           <div>
-            <h4 className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-2">Add to Reading List</h4>
+            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Add to Reading List</h4>
             <div className="flex flex-wrap gap-2">
               {bookmarks.readingLists.map(list => (
-                <button key={list.id} onClick={() => addToReadingList(list.id, publication)} className="px-3 py-1.5 bg-surface-2 text-content-2 rounded-lg text-xs hover:text-content-1 hover:bg-surface-3 border border-border transition-colors">
+                <button key={list.id} onClick={() => addToReadingList(list.id, publication)} className="px-3.5 py-2 bg-surface-2 text-content-2 rounded-xl text-xs hover:text-accent hover:bg-accent-muted border border-border hover:border-accent/20 transition-all font-medium">
                   + {list.name}
                 </button>
               ))}
@@ -93,12 +93,17 @@ export default function PublicationDetail({ publication, onClose }) {
 
         {similarPapers.length > 0 && (
           <div>
-            <h4 className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-2">Similar Papers</h4>
-            <div className="space-y-1.5">
+            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Similar Papers</h4>
+            <div className="space-y-2">
               {similarPapers.map(paper => (
-                <div key={paper.id} className="flex items-center justify-between p-3 bg-bg rounded-lg border border-border hover:border-border-hover cursor-pointer transition-colors" onClick={() => paper.url && window.open(paper.url, '_blank', 'noopener,noreferrer')}>
-                  <span className="text-content-2 text-sm line-clamp-1 flex-1 mr-3">{paper.title}</span>
-                  <span className="text-xs text-content-3 flex-shrink-0">{(paper.similarity * 100).toFixed(0)}%</span>
+                <div key={paper.id} className="flex items-center justify-between p-3.5 bg-bg rounded-xl border border-border hover:border-accent/20 cursor-pointer transition-all group" onClick={() => paper.url && window.open(paper.url, '_blank', 'noopener,noreferrer')}>
+                  <span className="text-content-2 text-sm line-clamp-1 flex-1 mr-3 group-hover:text-content-1">{paper.title}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-16 h-1.5 bg-surface-2 rounded-full overflow-hidden">
+                      <div className="h-full bg-accent/50 rounded-full" style={{ width: `${paper.similarity * 100}%` }} />
+                    </div>
+                    <span className="text-xs text-accent font-medium w-8 text-right">{(paper.similarity * 100).toFixed(0)}%</span>
+                  </div>
                 </div>
               ))}
             </div>

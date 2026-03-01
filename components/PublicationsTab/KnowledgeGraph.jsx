@@ -13,10 +13,10 @@ const ForceGraph2D = dynamic(
 );
 
 const NODE_COLORS = {
-  organism: '#34D399',
-  condition: '#D4A853',
-  outcome: '#E2BD6E',
-  other: '#78716C'
+  organism: '#4ADE80',
+  condition: '#F0C05A',
+  outcome: '#F5D280',
+  other: '#87837E'
 };
 
 export default function KnowledgeGraph({ onNodeClick }) {
@@ -34,7 +34,7 @@ export default function KnowledgeGraph({ onNodeClick }) {
     const nodeIds = new Set(nodes.map(n => n.id));
     const links = (graphData.links || [])
       .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
-      .map(l => ({ ...l, color: 'rgba(255,255,255,0.04)' }));
+      .map(l => ({ ...l, color: 'rgba(255,255,255,0.05)' }));
     return { nodes, links };
   }, [graphData]);
 
@@ -67,16 +67,16 @@ export default function KnowledgeGraph({ onNodeClick }) {
       ctx.font = `${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = isHighlighted ? '#FAFAF9' : '#78716C';
+      ctx.fillStyle = isHighlighted ? '#FAFAF9' : '#87837E';
       ctx.fillText(node.id, node.x, node.y + radius + 2);
     }
   }, [hoveredNode, connectedNodes]);
 
   const linkColor = useCallback((link) => {
-    if (!hoveredNode) return 'rgba(255,255,255,0.04)';
+    if (!hoveredNode) return 'rgba(255,255,255,0.05)';
     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-    if (connectedNodes.has(sourceId) && connectedNodes.has(targetId)) return 'rgba(212,168,83,0.35)';
+    if (connectedNodes.has(sourceId) && connectedNodes.has(targetId)) return 'rgba(240,192,90,0.45)';
     return 'rgba(255,255,255,0.02)';
   }, [hoveredNode, connectedNodes]);
 
@@ -86,17 +86,17 @@ export default function KnowledgeGraph({ onNodeClick }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 px-1">
+      <div className="flex flex-wrap gap-5 px-1">
         {Object.entries(NODE_COLORS).filter(([k]) => k !== 'other').map(([type, color]) => (
-          <div key={type} className="flex items-center space-x-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-            <span className="text-xs text-content-3 capitalize">{type}s</span>
+          <div key={type} className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full shadow-[0_0_6px_rgba(0,0,0,0.3)]" style={{ backgroundColor: color }} />
+            <span className="text-xs text-content-2 capitalize font-medium">{type}s</span>
           </div>
         ))}
-        <span className="text-xs text-content-3 ml-auto">{processedData.nodes.length} entities &middot; {processedData.links.length} relationships</span>
+        <span className="text-xs text-content-3 ml-auto font-medium">{processedData.nodes.length} entities &middot; {processedData.links.length} relationships</span>
       </div>
 
-      <div className="bg-bg rounded-lg border border-border overflow-hidden" style={{ height: '500px' }}>
+      <div className="bg-bg rounded-xl border border-border overflow-hidden shadow-inner-glow" style={{ height: '500px' }}>
         <ForceGraph2D
           ref={graphRef} graphData={processedData} nodeCanvasObject={nodeCanvasObject} linkColor={linkColor}
           linkWidth={link => Math.min(Math.log((link.weight || 1) + 1) * 0.5, 3)}
@@ -108,11 +108,11 @@ export default function KnowledgeGraph({ onNodeClick }) {
       </div>
 
       {hoveredNode && (
-        <div className="flex items-center space-x-3 text-xs text-content-3 px-1">
-          <span className="text-content-1 font-medium">{hoveredNode.id}</span>
-          <span className="capitalize">{hoveredNode.type}</span>
-          <span>{connectedNodes.size - 1} connections</span>
-          <span className="text-content-3">Click to filter</span>
+        <div className="flex items-center space-x-3 text-xs px-1 animate-fade-in">
+          <span className="text-accent font-semibold">{hoveredNode.id}</span>
+          <span className="text-content-2 capitalize">{hoveredNode.type}</span>
+          <span className="text-content-3">{connectedNodes.size - 1} connections</span>
+          <span className="text-accent/60 font-medium">Click to filter</span>
         </div>
       )}
     </div>
