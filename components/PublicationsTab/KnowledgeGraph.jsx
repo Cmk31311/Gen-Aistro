@@ -7,16 +7,16 @@ const ForceGraph2D = dynamic(
   () => import('react-force-graph').then(mod => mod.ForceGraph2D),
   { ssr: false, loading: () => (
     <div className="flex items-center justify-center h-96">
-      <div className="text-zinc-500 text-sm">Loading graph...</div>
+      <div className="text-content-3 text-sm">Loading graph...</div>
     </div>
   )}
 );
 
 const NODE_COLORS = {
-  organism: '#22c55e',
-  condition: '#6366f1',
-  outcome: '#818cf8',
-  other: '#52525b'
+  organism: '#34D399',
+  condition: '#D4A853',
+  outcome: '#E2BD6E',
+  other: '#78716C'
 };
 
 export default function KnowledgeGraph({ onNodeClick }) {
@@ -34,7 +34,7 @@ export default function KnowledgeGraph({ onNodeClick }) {
     const nodeIds = new Set(nodes.map(n => n.id));
     const links = (graphData.links || [])
       .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
-      .map(l => ({ ...l, color: 'rgba(255,255,255,0.06)' }));
+      .map(l => ({ ...l, color: 'rgba(255,255,255,0.04)' }));
     return { nodes, links };
   }, [graphData]);
 
@@ -54,88 +54,65 @@ export default function KnowledgeGraph({ onNodeClick }) {
     const isHighlighted = !hoveredNode || connectedNodes.has(node.id);
     const radius = Math.sqrt(node.val) * 1.5;
     const fontSize = Math.max(10 / globalScale, 2);
-
     ctx.beginPath();
     ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = isHighlighted ? node.color : node.color + '33';
     ctx.fill();
-
     if (isHighlighted && globalScale > 0.5) {
       ctx.strokeStyle = node.color;
       ctx.lineWidth = 1.5 / globalScale;
       ctx.stroke();
     }
-
     if (globalScale > 0.8 || (hoveredNode && node.id === hoveredNode.id)) {
       ctx.font = `${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = isHighlighted ? '#e4e4e7' : '#52525b';
+      ctx.fillStyle = isHighlighted ? '#FAFAF9' : '#78716C';
       ctx.fillText(node.id, node.x, node.y + radius + 2);
     }
   }, [hoveredNode, connectedNodes]);
 
   const linkColor = useCallback((link) => {
-    if (!hoveredNode) return 'rgba(255,255,255,0.05)';
+    if (!hoveredNode) return 'rgba(255,255,255,0.04)';
     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-    if (connectedNodes.has(sourceId) && connectedNodes.has(targetId)) {
-      return 'rgba(99,102,241,0.4)';
-    }
+    if (connectedNodes.has(sourceId) && connectedNodes.has(targetId)) return 'rgba(212,168,83,0.35)';
     return 'rgba(255,255,255,0.02)';
   }, [hoveredNode, connectedNodes]);
 
   if (!graphData?.nodes?.length) {
-    return (
-      <div className="flex items-center justify-center h-64 text-zinc-500 text-sm">
-        No knowledge graph data available
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64 text-content-3 text-sm">No knowledge graph data available</div>;
   }
 
   return (
     <div className="space-y-4">
-      {/* Legend */}
       <div className="flex flex-wrap gap-4 px-1">
         {Object.entries(NODE_COLORS).filter(([k]) => k !== 'other').map(([type, color]) => (
           <div key={type} className="flex items-center space-x-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-            <span className="text-xs text-zinc-500 capitalize">{type}s</span>
+            <span className="text-xs text-content-3 capitalize">{type}s</span>
           </div>
         ))}
-        <span className="text-xs text-zinc-600 ml-auto">
-          {processedData.nodes.length} entities · {processedData.links.length} relationships
-        </span>
+        <span className="text-xs text-content-3 ml-auto">{processedData.nodes.length} entities &middot; {processedData.links.length} relationships</span>
       </div>
 
-      {/* Graph */}
-      <div className="bg-[#0a0a0f] rounded-lg border border-[#222230] overflow-hidden" style={{ height: '500px' }}>
+      <div className="bg-bg rounded-lg border border-border overflow-hidden" style={{ height: '500px' }}>
         <ForceGraph2D
-          ref={graphRef}
-          graphData={processedData}
-          nodeCanvasObject={nodeCanvasObject}
-          linkColor={linkColor}
+          ref={graphRef} graphData={processedData} nodeCanvasObject={nodeCanvasObject} linkColor={linkColor}
           linkWidth={link => Math.min(Math.log((link.weight || 1) + 1) * 0.5, 3)}
-          onNodeHover={setHoveredNode}
-          onNodeClick={(node) => onNodeClick?.(node.id)}
-          backgroundColor="transparent"
-          width={undefined}
-          height={500}
-          d3AlphaDecay={0.02}
-          d3VelocityDecay={0.3}
-          cooldownTime={3000}
-          enableZoomInteraction={true}
-          enablePanInteraction={true}
+          onNodeHover={setHoveredNode} onNodeClick={(node) => onNodeClick?.(node.id)}
+          backgroundColor="transparent" width={undefined} height={500}
+          d3AlphaDecay={0.02} d3VelocityDecay={0.3} cooldownTime={3000}
+          enableZoomInteraction={true} enablePanInteraction={true}
         />
       </div>
 
-      {/* Hover info */}
       {hoveredNode && (
-        <div className="flex items-center space-x-3 text-xs text-zinc-500 px-1">
-          <span className="text-zinc-300 font-medium">{hoveredNode.id}</span>
+        <div className="flex items-center space-x-3 text-xs text-content-3 px-1">
+          <span className="text-content-1 font-medium">{hoveredNode.id}</span>
           <span className="capitalize">{hoveredNode.type}</span>
           <span>{connectedNodes.size - 1} connections</span>
-          <span className="text-zinc-600">Click to filter</span>
+          <span className="text-content-3">Click to filter</span>
         </div>
       )}
     </div>

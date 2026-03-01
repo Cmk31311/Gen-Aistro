@@ -88,9 +88,9 @@ export default function SearchTab() {
   return (
     <div className="space-y-6">
       {/* Search Input */}
-      <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
-        <h2 className="text-xl font-medium text-zinc-100 mb-1">Search</h2>
-        <p className="text-zinc-500 text-sm mb-5">Ask questions about NASA Space Biology research</p>
+      <div className="bg-surface-1 rounded-xl border border-border p-6">
+        <h2 className="text-xl font-semibold text-content-1 tracking-tight mb-1">Search</h2>
+        <p className="text-content-3 text-sm mb-5">Ask questions about NASA Space Biology research</p>
 
         <div className="space-y-4">
           <SearchAutocomplete value={query} onChange={setQuery} inputRef={searchInputRef} onSubmit={handleSearch} />
@@ -99,7 +99,7 @@ export default function SearchTab() {
           {searchHistory.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {searchHistory.slice(0, 5).map((h, i) => (
-                <button key={i} onClick={() => setQuery(h)} className="px-2.5 py-1 bg-[#1a1a25] text-zinc-500 rounded-md text-xs hover:text-zinc-300 hover:bg-[#22222e] transition-colors border border-[#2a2a3a]">
+                <button key={i} onClick={() => setQuery(h)} className="px-2.5 py-1 bg-surface-2 text-content-3 rounded-md text-xs hover:text-content-2 hover:bg-surface-3 transition-colors border border-border">
                   {h.length > 35 ? `${h.substring(0, 35)}...` : h}
                 </button>
               ))}
@@ -109,11 +109,11 @@ export default function SearchTab() {
           {/* Example questions */}
           {!answer && (
             <div>
-              <p className="text-xs text-zinc-600 mb-2">Try these</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-2">Try these</p>
+              <div className="flex flex-wrap gap-x-1 gap-y-1">
                 {EXAMPLE_QUESTIONS.map((q, i) => (
-                  <button key={i} onClick={() => setQuery(q)} className="text-sm text-zinc-500 hover:text-indigo-400 transition-colors">
-                    {q}{i < EXAMPLE_QUESTIONS.length - 1 ? ' · ' : ''}
+                  <button key={i} onClick={() => setQuery(q)} className="text-sm text-content-3 hover:text-accent transition-colors">
+                    {q}{i < EXAMPLE_QUESTIONS.length - 1 ? <span className="text-border-hover mx-1.5">&middot;</span> : ''}
                   </button>
                 ))}
               </div>
@@ -122,26 +122,26 @@ export default function SearchTab() {
 
           {/* Advanced toggle */}
           <div>
-            <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center space-x-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+            <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center space-x-1.5 text-xs text-content-3 hover:text-content-2 transition-colors">
               <SettingsIcon size={14} />
               <span>Advanced</span>
               {showAdvanced ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
             </button>
 
             {showAdvanced && (
-              <div className="mt-4 space-y-4 pt-4 border-t border-[#2a2a3a]">
+              <div className="mt-4 space-y-4 pt-4 border-t border-border">
                 <SearchFilters filters={filters} onFiltersChange={setFilters} />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1.5">Results: {topK}</label>
+                    <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Results: {topK}</label>
                     <input type="range" min="3" max="10" value={topK} onChange={(e) => setTopK(parseInt(e.target.value))} className="w-full" />
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1.5">Temperature: {temperature}</label>
+                    <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Temperature: {temperature}</label>
                     <input type="range" min="0" max="1" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className="w-full" />
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1.5">Max tokens: {maxTokens}</label>
+                    <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Max tokens: {maxTokens}</label>
                     <input type="range" min="200" max="1000" step="100" value={maxTokens} onChange={(e) => setMaxTokens(parseInt(e.target.value))} className="w-full" />
                   </div>
                 </div>
@@ -152,11 +152,11 @@ export default function SearchTab() {
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
-            className="w-full px-5 py-3 bg-indigo-500 hover:bg-indigo-400 text-white font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+            className="w-full px-5 py-3 bg-accent hover:bg-accent-hover text-black font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm active:scale-[0.98]"
           >
             {loading ? (
               <span className="flex items-center justify-center">
-                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-black/20 border-t-black mr-2" />
                 Searching...
               </span>
             ) : (
@@ -173,30 +173,30 @@ export default function SearchTab() {
 
       {/* Answer */}
       {answer && (
-        <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
+        <div className="bg-surface-1 rounded-xl border border-border p-6 animate-slide-up">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-medium text-zinc-200">Answer</h3>
+            <h3 className="text-base font-semibold text-content-1 tracking-tight">Answer</h3>
             <div className="flex items-center space-x-1">
-              <button onClick={() => addSearchBookmark(query, answer)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Save">
+              <button onClick={() => addSearchBookmark(query, answer)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-colors" title="Save">
                 <StarIcon size={16} />
               </button>
-              <button onClick={() => setShowCitation(!showCitation)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Citations">
+              <button onClick={() => setShowCitation(!showCitation)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-colors" title="Citations">
                 <CopyIcon size={16} />
               </button>
-              <button onClick={shareResults} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Share">
+              <button onClick={shareResults} className="p-2 rounded-lg text-content-3 hover:text-content-1 hover:bg-surface-2 transition-colors" title="Share">
                 <ShareIcon size={16} />
               </button>
-              <button onClick={() => exportSearchResults(query, answer, sources)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Export">
+              <button onClick={() => exportSearchResults(query, answer, sources)} className="p-2 rounded-lg text-content-3 hover:text-content-1 hover:bg-surface-2 transition-colors" title="Export">
                 <ExportIcon size={16} />
               </button>
             </div>
           </div>
-          <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">{answer}</div>
+          <div className="text-content-2 text-sm leading-relaxed whitespace-pre-wrap">{answer}</div>
 
           {metadata && (
-            <div className="mt-4 pt-3 border-t border-[#2a2a3a]">
-              <span className="text-xs text-zinc-600">
-                {metadata.model} · {metadata.chunks_used} sources · {metadata.used_web_search ? 'Web-augmented' : 'Corpus only'}
+            <div className="mt-4 pt-3 border-t border-border">
+              <span className="text-xs text-content-3">
+                {metadata.model} &middot; {metadata.chunks_used} sources &middot; {metadata.used_web_search ? 'Web-augmented' : 'Corpus only'}
               </span>
             </div>
           )}
@@ -208,7 +208,7 @@ export default function SearchTab() {
       {/* Sources */}
       {sources.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-3">Sources ({sources.length})</h3>
+          <h3 className="text-[11px] uppercase tracking-[0.08em] text-content-3 mb-3">Sources ({sources.length})</h3>
           <div className="space-y-3">
             {sources.map((source, index) => (
               <SourceCard key={index} source={source} index={index} />

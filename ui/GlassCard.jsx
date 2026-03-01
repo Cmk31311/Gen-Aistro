@@ -1,17 +1,17 @@
 'use client';
 
-export default function GlassCard({ children, className = '', hover = false, onClick, variant = 'surface' }) {
-  const variants = {
-    surface: 'bg-[#12121a] border-[#2a2a3a]',
-    elevated: 'bg-[#12121a] border-[#2a2a3a] hover:border-[#3a3a4a] hover:bg-[#1a1a25]',
-    inset: 'bg-[#0a0a0f] border-[#222230]',
-  };
+const variants = {
+  surface: 'bg-surface-1 border-border',
+  elevated: 'bg-surface-1 border-border hover:border-border-hover hover:bg-surface-2 hover:shadow-card-hover hover:-translate-y-[2px] cursor-pointer transition-all duration-300 ease-out',
+  inset: 'bg-bg border-border',
+};
 
+export default function GlassCard({ children, className = '', hover = false, onClick, variant = 'surface' }) {
   return (
     <div
       className={`rounded-xl border ${variants[variant]} ${
-        hover || variant === 'elevated' ? 'transition-all duration-200 cursor-pointer' : ''
-      } p-6 ${className}`}
+        hover && variant !== 'elevated' ? 'transition-all duration-200 cursor-pointer' : ''
+      } ${className}`}
       onClick={onClick}
     >
       {children}

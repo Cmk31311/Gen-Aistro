@@ -68,7 +68,7 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <SearchIcon size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
+        <SearchIcon size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-3 pointer-events-none" />
         <textarea
           ref={inputRef}
           value={value}
@@ -76,17 +76,17 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
           onFocus={() => setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
           placeholder="Ask a question about NASA Space Biology research..."
-          className="w-full pl-10 pr-4 py-3.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-zinc-200 text-base placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none transition-colors"
+          className="w-full pl-10 pr-4 py-3.5 bg-bg border border-border rounded-xl text-content-1 text-base placeholder-content-3 focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/15 resize-none transition-colors"
           rows={2}
         />
       </div>
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-30 w-full mt-1 bg-[#12121a] rounded-lg border border-[#2a2a3a] shadow-xl shadow-black/40 overflow-hidden">
+        <div className="absolute z-30 w-full mt-1 bg-surface-1 rounded-lg border border-border shadow-xl shadow-black/50 overflow-hidden">
           {suggestions.map((term, i) => (
             <button
               key={term}
               className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
-                i === selectedIndex ? 'bg-[#1a1a25] text-zinc-100' : 'text-zinc-400 hover:bg-[#1a1a25] hover:text-zinc-200'
+                i === selectedIndex ? 'bg-surface-2 text-content-1' : 'text-content-2 hover:bg-surface-2 hover:text-content-1'
               }`}
               onClick={() => {
                 const words = value.split(' ');

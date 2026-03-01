@@ -7,15 +7,15 @@ export default function SourceCard({ source, index }) {
   const bookmarked = isPaperBookmarked(source.doc_id);
 
   return (
-    <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] border-l-2 border-l-indigo-500/40 p-5 hover:border-[#3a3a4a] hover:-translate-y-[1px] transition-all duration-200">
+    <div className="bg-surface-1 rounded-xl border border-border border-l-2 border-l-accent/30 p-5 hover:border-border-hover hover:-translate-y-[2px] hover:shadow-card-hover transition-all duration-300 ease-out">
       <div className="flex items-start justify-between gap-3 mb-2">
-        <h4 className="text-zinc-100 font-medium text-base line-clamp-2 flex-1">
+        <h4 className="text-content-1 font-medium text-base line-clamp-2 flex-1">
           {source.doc_title || 'Untitled'}
         </h4>
         <button
           onClick={() => togglePaperBookmark({ id: source.doc_id, title: source.doc_title, url: source.url })}
           className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
-            bookmarked ? 'text-indigo-400' : 'text-zinc-600 hover:text-indigo-400 hover:bg-[#1a1a25]'
+            bookmarked ? 'text-accent' : 'text-content-3 hover:text-accent hover:bg-surface-2'
           }`}
           aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
         >
@@ -23,11 +23,11 @@ export default function SourceCard({ source, index }) {
         </button>
       </div>
 
-      <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-3">
+      <p className="text-content-2 text-sm leading-relaxed line-clamp-3 mb-3">
         {source.text}
       </p>
 
-      <div className="flex items-center justify-between text-xs text-zinc-500">
+      <div className="flex items-center justify-between text-xs text-content-3">
         <div className="flex items-center space-x-3">
           <span>Relevance {(source.score * 100).toFixed(0)}%</span>
           {source.year && <span>{source.year}</span>}
@@ -37,7 +37,7 @@ export default function SourceCard({ source, index }) {
             href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-zinc-500 hover:text-indigo-400 transition-colors"
+            className="inline-flex items-center text-content-3 hover:text-accent transition-colors"
           >
             View source
             <ExternalLinkIcon size={12} className="ml-1" />

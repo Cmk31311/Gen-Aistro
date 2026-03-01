@@ -46,31 +46,27 @@ export default function SearchFilters({ filters, onFiltersChange }) {
   const hasFilters = filters.includeKeywords.length > 0 || filters.excludeKeywords.length > 0;
 
   const removeTag = (type, keyword) => {
-    onFiltersChange({
-      ...filters,
-      [type]: filters[type].filter(k => k !== keyword)
-    });
+    onFiltersChange({ ...filters, [type]: filters[type].filter(k => k !== keyword) });
   };
 
   return (
     <div className="space-y-4">
-      {/* Include Keywords */}
       <div>
-        <label className="block text-xs text-zinc-500 mb-1.5">Include keywords</label>
+        <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Include keywords</label>
         <input
           type="text"
           value={keywordInput}
           onChange={(e) => setKeywordInput(e.target.value)}
           onKeyDown={handleAddKeyword}
           placeholder="Type and press Enter..."
-          className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
+          className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-sm text-content-1 placeholder-content-3 focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/15"
         />
         {filters.includeKeywords.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
             {filters.includeKeywords.map(kw => (
-              <span key={kw} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#1a1a25] text-zinc-300 rounded-md text-xs border border-[#2a2a3a]">
+              <span key={kw} className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-2 text-content-2 rounded-md text-xs border border-border">
                 {kw}
-                <button onClick={() => removeTag('includeKeywords', kw)} className="text-zinc-500 hover:text-zinc-300">
+                <button onClick={() => removeTag('includeKeywords', kw)} className="text-content-3 hover:text-content-1">
                   <CloseIcon size={10} />
                 </button>
               </span>
@@ -79,16 +75,15 @@ export default function SearchFilters({ filters, onFiltersChange }) {
         )}
       </div>
 
-      {/* Exclude Keywords */}
       <div>
-        <label className="block text-xs text-zinc-500 mb-1.5">Exclude keywords</label>
+        <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Exclude keywords</label>
         <input
           type="text"
           value={excludeInput}
           onChange={(e) => setExcludeInput(e.target.value)}
           onKeyDown={handleAddExclude}
           placeholder="Type and press Enter..."
-          className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20"
+          className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-sm text-content-1 placeholder-content-3 focus:outline-none focus:border-red-500/40 focus:ring-1 focus:ring-red-500/15"
         />
         {filters.excludeKeywords.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
@@ -104,9 +99,8 @@ export default function SearchFilters({ filters, onFiltersChange }) {
         )}
       </div>
 
-      {/* Organism Filter */}
       <div>
-        <label className="block text-xs text-zinc-500 mb-1.5">Organisms</label>
+        <label className="block text-[11px] uppercase tracking-[0.08em] text-content-3 mb-1.5">Organisms</label>
         <div className="flex flex-wrap gap-1.5">
           {ORGANISMS.map(org => {
             const isActive = filters.includeKeywords.includes(org.toLowerCase());
@@ -116,8 +110,8 @@ export default function SearchFilters({ filters, onFiltersChange }) {
                 onClick={() => toggleOrganism(org)}
                 className={`px-2.5 py-1 rounded-md text-xs transition-colors border ${
                   isActive
-                    ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
-                    : 'bg-[#1a1a25] text-zinc-500 border-[#2a2a3a] hover:text-zinc-300 hover:border-[#3a3a4a]'
+                    ? 'bg-accent-muted text-accent border-accent/25'
+                    : 'bg-surface-2 text-content-3 border-border hover:text-content-2 hover:border-border-hover'
                 }`}
               >
                 {org}
@@ -128,7 +122,7 @@ export default function SearchFilters({ filters, onFiltersChange }) {
       </div>
 
       {hasFilters && (
-        <button onClick={clearAll} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+        <button onClick={clearAll} className="text-xs text-content-3 hover:text-content-2 transition-colors">
           Clear all filters
         </button>
       )}
