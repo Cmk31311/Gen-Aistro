@@ -7,6 +7,18 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: #0a0a0f;
+    color: #e4e4e7;
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.3);
+    color: #e4e4e7;
   }
 }
 
@@ -37,14 +49,14 @@
   }
 }
 
-/* Skeleton shimmer animation */
+/* Skeleton shimmer */
 @keyframes shimmer {
   0% { background-position: -200px 0; }
   100% { background-position: calc(200px + 100%) 0; }
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -53,7 +65,7 @@
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateY(8px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -65,9 +77,9 @@
   animation: modal-in 0.2s ease-out;
 }
 
-/* Fade in animation */
+/* Fade in */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -75,7 +87,7 @@
   animation: fade-in 0.2s ease-out;
 }
 
-/* Respect reduced motion preference */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer,
   .animate-pulse,
@@ -89,27 +101,59 @@
   }
 }
 
-/* Scrollbar styling for dark mode */
-.dark ::-webkit-scrollbar {
+/* Scrollbar */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.dark ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.15);
+::-webkit-scrollbar-thumb {
+  background: #2a2a3a;
   border-radius: 3px;
 }
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.25);
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a4a;
 }
 
-/* Light mode scrollbar */
-.light ::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.15);
-  border-radius: 3px;
+/* Range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #2a2a3a;
+  border-radius: 2px;
+  outline: none;
 }
-.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.25);
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+  border: 2px solid #0a0a0f;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+  border: 2px solid #0a0a0f;
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 2px;
 }

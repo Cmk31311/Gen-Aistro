@@ -18,105 +18,101 @@ export default function InsightsTab() {
   if (loading) return <InsightsSkeleton />;
   if (error) return <ErrorState message={error} onRetry={reload} />;
 
+  const impactDot = (impact) => {
+    const colors = { high: 'bg-red-500', medium: 'bg-yellow-500', low: 'bg-green-500' };
+    return colors[impact] || 'bg-zinc-500';
+  };
+
   return (
     <div className="space-y-6">
-      <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-6">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white mb-2">{'\uD83D\uDCA1'} Data-Driven Research Insights</h2>
-          <p className="text-blue-200/70">Insights computed from {publications.length} NASA Space Biology publications</p>
-        </div>
+      <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
+        <h2 className="text-xl font-medium text-zinc-100 mb-1">Insights</h2>
+        <p className="text-zinc-500 text-sm mb-6">Data-driven findings from {publications.length} publications</p>
 
-        {/* Insights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {insights.map((insight) => (
             <div
               key={insight.id}
               onClick={() => setSelectedInsight(insight)}
-              className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10 p-4 hover:bg-black/40 hover:border-white/20 transition-all duration-200 cursor-pointer group"
+              className="bg-[#0a0a0f] rounded-xl border border-[#222230] p-5 hover:border-[#2a2a3a] hover:bg-[#12121a] transition-all duration-200 cursor-pointer group"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && setSelectedInsight(insight)}
-              aria-label={`View insight: ${insight.title}`}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  insight.impact === 'high' ? 'bg-red-500/20 text-red-300' :
-                  insight.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                  'bg-green-500/20 text-green-300'
-                }`}>
-                  {insight.impact.toUpperCase()} IMPACT
-                </div>
-                <div className="text-xs text-blue-200/70">
-                  {Math.round(insight.confidence * 100)}% confidence
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs bg-[#1a1a25] text-zinc-400 rounded-full px-2 py-0.5 border border-[#2a2a3a]">
+                  {insight.type}
+                </span>
+                <div className="flex items-center space-x-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${impactDot(insight.impact)}`} />
+                  <span className="text-xs text-zinc-500">{insight.impact}</span>
                 </div>
               </div>
 
-              <h3 className="text-white font-semibold mb-2 group-hover:text-blue-200 transition-colors">
+              <h3 className="text-zinc-200 font-medium text-sm mb-2 group-hover:text-zinc-100 transition-colors">
                 {insight.title}
               </h3>
 
-              <p className="text-blue-200/70 text-sm mb-3 line-clamp-3">
+              <p className="text-zinc-500 text-sm mb-4 line-clamp-3 leading-relaxed">
                 {insight.description}
               </p>
 
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-purple-300 bg-purple-500/20 px-2 py-1 rounded-full">
-                  {insight.type}
-                </span>
-                <span className="text-xs text-blue-200/50">Click for details</span>
+              {/* Confidence bar */}
+              <div>
+                <div className="flex items-center justify-between text-xs text-zinc-600 mb-1">
+                  <span>Confidence</span>
+                  <span>{Math.round(insight.confidence * 100)}%</span>
+                </div>
+                <div className="h-1 bg-[#1a1a25] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-500/60 rounded-full transition-all duration-500"
+                    style={{ width: `${insight.confidence * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Insight Detail Modal */}
-        <Modal
-          isOpen={!!selectedInsight}
-          onClose={() => setSelectedInsight(null)}
-          title={selectedInsight?.title || ''}
-        >
-          {selectedInsight && (
-            <div className="space-y-4">
-              <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                <h4 className="text-lg font-semibold text-white mb-2">Insight Details</h4>
-                <p className="text-blue-200/80">{selectedInsight.description}</p>
-              </div>
+      {/* Insight Detail Modal */}
+      <Modal
+        isOpen={!!selectedInsight}
+        onClose={() => setSelectedInsight(null)}
+        title={selectedInsight?.title || ''}
+      >
+        {selectedInsight && (
+          <div className="space-y-4">
+            <p className="text-zinc-400 text-sm leading-relaxed">{selectedInsight.description}</p>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                  <h4 className="text-sm font-semibold text-blue-200 mb-2">Impact Level</h4>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    selectedInsight.impact === 'high' ? 'bg-red-500/20 text-red-300' :
-                    selectedInsight.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                    'bg-green-500/20 text-green-300'
-                  }`}>
-                    {selectedInsight.impact.toUpperCase()}
-                  </div>
-                </div>
-
-                <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                  <h4 className="text-sm font-semibold text-blue-200 mb-2">Confidence</h4>
-                  <div className="text-2xl font-bold text-purple-300">
-                    {Math.round(selectedInsight.confidence * 100)}%
-                  </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#0a0a0f] rounded-lg border border-[#222230] p-4">
+                <div className="text-xs text-zinc-500 mb-1">Impact</div>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${impactDot(selectedInsight.impact)}`} />
+                  <span className="text-sm text-zinc-300 capitalize">{selectedInsight.impact}</span>
                 </div>
               </div>
-
-              <div className="bg-black/40 rounded-lg p-4 border border-white/10">
-                <h4 className="text-sm font-semibold text-blue-200 mb-2">Supporting Data</h4>
-                <div className="space-y-1">
-                  {Object.entries(selectedInsight.data).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between text-sm">
-                      <span className="text-blue-200/70 capitalize">{key.replace(/_/g, ' ')}:</span>
-                      <span className="text-white font-medium">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="bg-[#0a0a0f] rounded-lg border border-[#222230] p-4">
+                <div className="text-xs text-zinc-500 mb-1">Confidence</div>
+                <div className="text-xl font-light text-zinc-200">{Math.round(selectedInsight.confidence * 100)}%</div>
               </div>
             </div>
-          )}
-        </Modal>
-      </div>
+
+            <div className="bg-[#0a0a0f] rounded-lg border border-[#222230] p-4">
+              <div className="text-xs text-zinc-500 mb-3">Supporting Data</div>
+              <div className="space-y-2">
+                {Object.entries(selectedInsight.data).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between text-sm">
+                    <span className="text-zinc-500 capitalize">{key.replace(/_/g, ' ')}</span>
+                    <span className="text-zinc-300">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -1,8 +1,18 @@
 'use client';
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { generateBibTeXCitation } from '../../lib/exportUtils';
+import { CopyIcon } from '../../ui/Icons';
+
+const FORMATS = [
+  { label: 'APA', key: 'apa' },
+  { label: 'MLA', key: 'mla' },
+  { label: 'Chicago', key: 'chicago' },
+  { label: 'BibTeX', key: 'bibtex' },
+];
 
 export default function CitationPanel({ sources }) {
+  const [copiedKey, setCopiedKey] = useState(null);
+
   const generateCitation = useCallback((source) => {
     const year = source.year || new Date().getFullYear();
     const title = source.doc_title || 'Untitled';
@@ -16,50 +26,48 @@ export default function CitationPanel({ sources }) {
     };
   }, []);
 
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text, key) => {
     try {
       await navigator.clipboard.writeText(text);
-    } catch {
-      // fallback
-    }
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } catch {}
   };
 
   return (
-    <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-6">
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-        <span className="mr-3">{'\uD83D\uDCDD'}</span>
-        Citation Generator
-      </h3>
-      <div className="space-y-4">
+    <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
+      <h3 className="text-base font-medium text-zinc-200 mb-4">Citations</h3>
+      <div className="space-y-5">
         {sources.map((source, index) => {
           const citations = generateCitation(source);
           return (
-            <div key={index} className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10 p-4">
-              <h4 className="text-white font-semibold mb-3">{source.doc_title || 'Untitled'}</h4>
-              <div className="space-y-3">
-                {[
-                  { label: 'APA Style', key: 'apa' },
-                  { label: 'MLA Style', key: 'mla' },
-                  { label: 'Chicago Style', key: 'chicago' },
-                  { label: 'BibTeX', key: 'bibtex' }
-                ].map(({ label, key }) => (
+            <div key={index} className="space-y-3">
+              <h4 className="text-sm font-medium text-zinc-300">{source.doc_title || 'Untitled'}</h4>
+              {FORMATS.map(({ label, key }) => {
+                const copyKey = `${index}-${key}`;
+                return (
                   <div key={key}>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-semibold text-blue-200">{label}</label>
+                      <span className="text-xs text-zinc-500">{label}</span>
                       <button
-                        onClick={() => copyToClipboard(citations[key])}
-                        className="text-xs text-purple-300 hover:text-purple-200 transition-colors"
+                        onClick={() => copyToClipboard(citations[key], copyKey)}
+                        className="p-1 rounded text-zinc-600 hover:text-zinc-300 transition-colors"
                         aria-label={`Copy ${label} citation`}
                       >
-                        Copy
+                        {copiedKey === copyKey ? (
+                          <span className="text-xs text-green-500">Copied</span>
+                        ) : (
+                          <CopyIcon size={12} />
+                        )}
                       </button>
                     </div>
-                    <div className="bg-black/40 rounded p-3 text-sm text-blue-200/80 font-mono break-all">
+                    <div className="bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg p-3 text-sm text-zinc-400 font-mono break-all leading-relaxed">
                       {citations[key]}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
+              {index < sources.length - 1 && <div className="border-t border-[#2a2a3a] pt-2" />}
             </div>
           );
         })}

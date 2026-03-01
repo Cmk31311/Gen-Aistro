@@ -5,14 +5,18 @@ import { usePapers } from '../../context/PapersContext';
 
 const ForceGraph2D = dynamic(
   () => import('react-force-graph').then(mod => mod.ForceGraph2D),
-  { ssr: false, loading: () => <div className="flex items-center justify-center h-96"><div className="text-blue-300 text-6xl mb-4 animate-pulse">{'\uD83C\uDF10'}</div></div> }
+  { ssr: false, loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="text-zinc-500 text-sm">Loading graph...</div>
+    </div>
+  )}
 );
 
 const NODE_COLORS = {
   organism: '#22c55e',
-  condition: '#3b82f6',
-  outcome: '#a855f7',
-  other: '#64748b'
+  condition: '#6366f1',
+  outcome: '#818cf8',
+  other: '#52525b'
 };
 
 export default function KnowledgeGraph({ onNodeClick }) {
@@ -22,21 +26,15 @@ export default function KnowledgeGraph({ onNodeClick }) {
 
   const processedData = useMemo(() => {
     if (!graphData?.nodes) return { nodes: [], links: [] };
-
     const nodes = graphData.nodes.map(n => ({
       ...n,
       color: NODE_COLORS[n.type] || NODE_COLORS.other,
       val: Math.max(n.size || 10, 5)
     }));
-
     const nodeIds = new Set(nodes.map(n => n.id));
     const links = (graphData.links || [])
       .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
-      .map(l => ({
-        ...l,
-        color: 'rgba(255,255,255,0.1)'
-      }));
-
+      .map(l => ({ ...l, color: 'rgba(255,255,255,0.06)' }));
     return { nodes, links };
   }, [graphData]);
 
@@ -72,24 +70,24 @@ export default function KnowledgeGraph({ onNodeClick }) {
       ctx.font = `${fontSize}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = isHighlighted ? '#e2e8f0' : '#64748b';
+      ctx.fillStyle = isHighlighted ? '#e4e4e7' : '#52525b';
       ctx.fillText(node.id, node.x, node.y + radius + 2);
     }
   }, [hoveredNode, connectedNodes]);
 
   const linkColor = useCallback((link) => {
-    if (!hoveredNode) return 'rgba(255,255,255,0.08)';
+    if (!hoveredNode) return 'rgba(255,255,255,0.05)';
     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
     if (connectedNodes.has(sourceId) && connectedNodes.has(targetId)) {
-      return 'rgba(168,85,247,0.5)';
+      return 'rgba(99,102,241,0.4)';
     }
-    return 'rgba(255,255,255,0.03)';
+    return 'rgba(255,255,255,0.02)';
   }, [hoveredNode, connectedNodes]);
 
   if (!graphData?.nodes?.length) {
     return (
-      <div className="flex items-center justify-center h-64 text-blue-200/70">
+      <div className="flex items-center justify-center h-64 text-zinc-500 text-sm">
         No knowledge graph data available
       </div>
     );
@@ -98,29 +96,26 @@ export default function KnowledgeGraph({ onNodeClick }) {
   return (
     <div className="space-y-4">
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 px-2">
+      <div className="flex flex-wrap gap-4 px-1">
         {Object.entries(NODE_COLORS).filter(([k]) => k !== 'other').map(([type, color]) => (
-          <div key={type} className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
-            <span className="text-sm text-blue-200 capitalize">{type}s</span>
+          <div key={type} className="flex items-center space-x-1.5">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+            <span className="text-xs text-zinc-500 capitalize">{type}s</span>
           </div>
         ))}
-        <span className="text-xs text-blue-200/50 ml-auto">
-          {processedData.nodes.length} entities &middot; {processedData.links.length} relationships
+        <span className="text-xs text-zinc-600 ml-auto">
+          {processedData.nodes.length} entities · {processedData.links.length} relationships
         </span>
       </div>
 
       {/* Graph */}
-      <div className="bg-black/30 rounded-lg border border-white/10 overflow-hidden" style={{ height: '500px' }}>
+      <div className="bg-[#0a0a0f] rounded-lg border border-[#222230] overflow-hidden" style={{ height: '500px' }}>
         <ForceGraph2D
           ref={graphRef}
           graphData={processedData}
           nodeCanvasObject={nodeCanvasObject}
           linkColor={linkColor}
-          linkWidth={link => {
-            const w = link.weight || 1;
-            return Math.min(Math.log(w + 1) * 0.5, 3);
-          }}
+          linkWidth={link => Math.min(Math.log((link.weight || 1) + 1) * 0.5, 3)}
           onNodeHover={setHoveredNode}
           onNodeClick={(node) => onNodeClick?.(node.id)}
           backgroundColor="transparent"
@@ -134,13 +129,13 @@ export default function KnowledgeGraph({ onNodeClick }) {
         />
       </div>
 
-      {/* Hover tooltip */}
+      {/* Hover info */}
       {hoveredNode && (
-        <div className="bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 p-3 text-sm">
-          <span className="text-white font-semibold">{hoveredNode.id}</span>
-          <span className="text-blue-200/70 ml-2 capitalize">({hoveredNode.type})</span>
-          <span className="text-purple-300 ml-2">Connections: {connectedNodes.size - 1}</span>
-          <span className="text-blue-200/50 ml-2">Click to filter publications</span>
+        <div className="flex items-center space-x-3 text-xs text-zinc-500 px-1">
+          <span className="text-zinc-300 font-medium">{hoveredNode.id}</span>
+          <span className="capitalize">{hoveredNode.type}</span>
+          <span>{connectedNodes.size - 1} connections</span>
+          <span className="text-zinc-600">Click to filter</span>
         </div>
       )}
     </div>

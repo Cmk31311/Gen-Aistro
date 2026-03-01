@@ -9,6 +9,7 @@ import SourceCard from './SourceCard';
 import CitationPanel from './CitationPanel';
 import SearchAutocomplete from './SearchAutocomplete';
 import ErrorState from '../../ui/ErrorState';
+import { SearchIcon, StarIcon, CopyIcon, ShareIcon, ExportIcon, ChevronDownIcon, ChevronUpIcon, SettingsIcon } from '../../ui/Icons';
 
 export default function SearchTab() {
   const [query, setQuery] = useState('');
@@ -21,6 +22,7 @@ export default function SearchTab() {
   const [metadata, setMetadata] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
   const [showCitation, setShowCitation] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({ includeKeywords: [], excludeKeywords: [] });
   const searchInputRef = useRef(null);
@@ -32,66 +34,43 @@ export default function SearchTab() {
       text: `Query: ${query}\n\nAnswer: ${answer}\n\nSources: ${sources.length} publications`,
       url: window.location.href
     };
-
     if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // Share cancelled
-      }
+      try { await navigator.share(shareData); } catch {}
     } else {
-      const text = `${shareData.title}\n\n${shareData.text}`;
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(`${shareData.title}\n\n${shareData.text}`);
     }
   }, [query, answer, sources]);
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) return;
-
     setLoading(true);
     setError('');
     setAnswer('');
     setSources([]);
     setMetadata(null);
     setShowCitation(false);
-
     setSearchHistory(prev => [query, ...prev.filter(q => q !== query).slice(0, 9)]);
 
     try {
       const queryEmbedding = await embedQuery(query);
-
       const filter = {};
-      if (filters.includeKeywords.length > 0) {
-        filter.keywords = { ...filter.keywords, include: filters.includeKeywords };
-      }
-      if (filters.excludeKeywords.length > 0) {
-        filter.keywords = { ...filter.keywords, exclude: filters.excludeKeywords };
-      }
+      if (filters.includeKeywords.length > 0) filter.keywords = { ...filter.keywords, include: filters.includeKeywords };
+      if (filters.excludeKeywords.length > 0) filter.keywords = { ...filter.keywords, exclude: filters.excludeKeywords };
 
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ queryEmbedding, topK, filter })
       });
-
       if (!searchResponse.ok) throw new Error('Search failed');
       const searchData = await searchResponse.json();
-
-      if (!searchData.results || searchData.results.length === 0) {
-        throw new Error('No relevant documents found');
-      }
+      if (!searchData.results || searchData.results.length === 0) throw new Error('No relevant documents found');
 
       const askResponse = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: query,
-          chunks: searchData.results,
-          temperature,
-          max_tokens: maxTokens
-        })
+        body: JSON.stringify({ question: query, chunks: searchData.results, temperature, max_tokens: maxTokens })
       });
-
       if (!askResponse.ok) throw new Error('Answer generation failed');
       const askData = await askResponse.json();
 
@@ -108,195 +87,128 @@ export default function SearchTab() {
 
   return (
     <div className="space-y-6">
-      {/* Search Controls */}
-      <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent flex items-center">
-              <span className="mr-3 text-4xl">{'\uD83D\uDD0D'}</span>
-              NASA Space Biology Search
-            </h2>
-            <p className="text-blue-200/70 mt-2 text-lg">
-              Ask questions about NASA Space Biology research using AI-powered search
-            </p>
-          </div>
-        </div>
+      {/* Search Input */}
+      <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
+        <h2 className="text-xl font-medium text-zinc-100 mb-1">Search</h2>
+        <p className="text-zinc-500 text-sm mb-5">Ask questions about NASA Space Biology research</p>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-blue-200 mb-2">
-              Search Query
-            </label>
-            <SearchAutocomplete
-              value={query}
-              onChange={setQuery}
-              inputRef={searchInputRef}
-              onSubmit={handleSearch}
-            />
-          </div>
+          <SearchAutocomplete value={query} onChange={setQuery} inputRef={searchInputRef} onSubmit={handleSearch} />
 
-          {/* Search History */}
+          {/* Recent searches */}
           {searchHistory.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {searchHistory.slice(0, 5).map((h, i) => (
+                <button key={i} onClick={() => setQuery(h)} className="px-2.5 py-1 bg-[#1a1a25] text-zinc-500 rounded-md text-xs hover:text-zinc-300 hover:bg-[#22222e] transition-colors border border-[#2a2a3a]">
+                  {h.length > 35 ? `${h.substring(0, 35)}...` : h}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Example questions */}
+          {!answer && (
             <div>
-              <label className="block text-sm font-semibold text-blue-200 mb-2">Recent Searches</label>
+              <p className="text-xs text-zinc-600 mb-2">Try these</p>
               <div className="flex flex-wrap gap-2">
-                {searchHistory.slice(0, 5).map((historyQuery, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setQuery(historyQuery)}
-                    className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs hover:bg-purple-500/30 transition-colors"
-                  >
-                    {historyQuery.length > 30 ? `${historyQuery.substring(0, 30)}...` : historyQuery}
+                {EXAMPLE_QUESTIONS.map((q, i) => (
+                  <button key={i} onClick={() => setQuery(q)} className="text-sm text-zinc-500 hover:text-indigo-400 transition-colors">
+                    {q}{i < EXAMPLE_QUESTIONS.length - 1 ? ' · ' : ''}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Example Questions */}
+          {/* Advanced toggle */}
           <div>
-            <label className="block text-sm font-semibold text-blue-200 mb-2">{'\uD83D\uDCA1'} Try asking these questions:</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {EXAMPLE_QUESTIONS.map((question, index) => (
-                <button
-                  key={index}
-                  onClick={() => setQuery(question)}
-                  className="px-4 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-200 rounded-lg text-sm hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-200 text-left border border-white/10 hover:border-white/20"
-                >
-                  <span className="text-purple-300 mr-2">{'\uD83D\uDD2C'}</span>
-                  {question}
-                </button>
-              ))}
-            </div>
-          </div>
+            <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center space-x-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+              <SettingsIcon size={14} />
+              <span>Advanced</span>
+              {showAdvanced ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
+            </button>
 
-          {/* Advanced Filters */}
-          <SearchFilters filters={filters} onFiltersChange={setFilters} />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-blue-200 mb-2">
-                Top-K Results: {topK}
-              </label>
-              <input
-                type="range" min="3" max="10" value={topK}
-                onChange={(e) => setTopK(parseInt(e.target.value))}
-                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-blue-200 mb-2">
-                Temperature: {temperature}
-              </label>
-              <input
-                type="range" min="0" max="1" step="0.1" value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-blue-200 mb-2">
-                Max Tokens: {maxTokens}
-              </label>
-              <input
-                type="range" min="200" max="1000" step="100" value={maxTokens}
-                onChange={(e) => setMaxTokens(parseInt(e.target.value))}
-                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-              />
-            </div>
+            {showAdvanced && (
+              <div className="mt-4 space-y-4 pt-4 border-t border-[#2a2a3a]">
+                <SearchFilters filters={filters} onFiltersChange={setFilters} />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">Results: {topK}</label>
+                    <input type="range" min="3" max="10" value={topK} onChange={(e) => setTopK(parseInt(e.target.value))} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">Temperature: {temperature}</label>
+                    <input type="range" min="0" max="1" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">Max tokens: {maxTokens}</label>
+                    <input type="range" min="200" max="1000" step="100" value={maxTokens} onChange={(e) => setMaxTokens(parseInt(e.target.value))} className="w-full" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <button
             onClick={handleSearch}
             disabled={loading || !query.trim()}
-            className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-purple-500/25"
+            className="w-full px-5 py-3 bg-indigo-500 hover:bg-indigo-400 text-white font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
           >
             {loading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              <span className="flex items-center justify-center">
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
                 Searching...
-              </div>
+              </span>
             ) : (
-              '\uD83D\uDD0D Search & Generate Answer'
+              <span className="flex items-center justify-center">
+                <SearchIcon size={16} className="mr-2" />
+                Search
+              </span>
             )}
           </button>
         </div>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <ErrorState message={error} onRetry={handleSearch} />
-      )}
+      {error && <ErrorState message={error} onRetry={handleSearch} />}
 
-      {/* Answer Display */}
+      {/* Answer */}
       {answer && (
-        <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-6">
+        <div className="bg-[#12121a] rounded-xl border border-[#2a2a3a] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-white flex items-center">
-              <span className="mr-3">{'\uD83E\uDD16'}</span>
-              AI Answer
-            </h3>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => addSearchBookmark(query, answer)}
-                className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-lg text-sm font-medium hover:bg-yellow-500/30 transition-colors"
-                aria-label="Save search"
-              >
-                {'\u2606'} Save
+            <h3 className="text-base font-medium text-zinc-200">Answer</h3>
+            <div className="flex items-center space-x-1">
+              <button onClick={() => addSearchBookmark(query, answer)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Save">
+                <StarIcon size={16} />
               </button>
-              <button
-                onClick={() => setShowCitation(!showCitation)}
-                className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors"
-              >
-                {'\uD83D\uDCDD'} Citations
+              <button onClick={() => setShowCitation(!showCitation)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Citations">
+                <CopyIcon size={16} />
               </button>
-              <button
-                onClick={shareResults}
-                className="px-3 py-1 bg-green-500/20 text-green-300 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
-              >
-                {'\uD83D\uDCE4'} Share
+              <button onClick={shareResults} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Share">
+                <ShareIcon size={16} />
               </button>
-              <button
-                onClick={() => exportSearchResults(query, answer, sources)}
-                className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors"
-              >
-                {'\uD83D\uDCE5'} Export
+              <button onClick={() => exportSearchResults(query, answer, sources)} className="p-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-[#1a1a25] transition-colors" title="Export">
+                <ExportIcon size={16} />
               </button>
             </div>
           </div>
-          <div className="prose prose-invert max-w-none">
-            <div className="text-blue-200 leading-relaxed whitespace-pre-wrap">
-              {answer}
-            </div>
-          </div>
+          <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">{answer}</div>
 
           {metadata && (
-            <div className="mt-4 p-3 bg-black/30 rounded-lg border border-white/10">
-              <div className="text-sm text-blue-200/70">
-                <span className="font-medium">Search Method:</span> {metadata.search_method || 'Standard'}
-                {metadata.web_search && (
-                  <span className="ml-4">
-                    <span className="font-medium">Web Search:</span> Used for additional context
-                  </span>
-                )}
-              </div>
+            <div className="mt-4 pt-3 border-t border-[#2a2a3a]">
+              <span className="text-xs text-zinc-600">
+                {metadata.model} · {metadata.chunks_used} sources · {metadata.used_web_search ? 'Web-augmented' : 'Corpus only'}
+              </span>
             </div>
           )}
         </div>
       )}
 
-      {/* Citation Panel */}
-      {showCitation && sources.length > 0 && (
-        <CitationPanel sources={sources} />
-      )}
+      {showCitation && sources.length > 0 && <CitationPanel sources={sources} />}
 
-      {/* Sources Display */}
+      {/* Sources */}
       {sources.length > 0 && (
-        <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-6">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-            <span className="mr-3">{'\uD83D\uDCDA'}</span>
-            Sources ({sources.length})
-          </h3>
+        <div>
+          <h3 className="text-sm font-medium text-zinc-400 mb-3">Sources ({sources.length})</h3>
           <div className="space-y-3">
             {sources.map((source, index) => (
               <SourceCard key={index} source={source} index={index} />

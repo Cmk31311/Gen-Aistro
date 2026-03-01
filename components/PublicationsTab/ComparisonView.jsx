@@ -1,5 +1,6 @@
 'use client';
 import { getPublicationAbstract, extractKeyTerms } from '../../lib/paperUtils';
+import { CloseIcon } from '../../ui/Icons';
 
 export default function ComparisonView({ papers, onClose }) {
   if (papers.length < 2) return null;
@@ -10,61 +11,58 @@ export default function ComparisonView({ papers, onClose }) {
     terms: extractKeyTerms(p.title + ' ' + getPublicationAbstract(p))
   }));
 
-  // Find common and unique terms
   const allTermSets = paperData.map(p => new Set(p.terms));
   const commonTerms = paperData[0].terms.filter(t => allTermSets.every(s => s.has(t)));
 
   return (
-    <div className="bg-black/20 backdrop-blur-md rounded-xl border border-purple-500/20 p-6 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white">
-          {'\u2696\uFE0F'} Paper Comparison
-        </h3>
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg text-sm font-medium hover:bg-red-500/30 transition-colors"
-        >
-          Close Comparison
+    <div className="bg-[#12121a] rounded-xl border border-indigo-500/20 p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-base font-medium text-zinc-200">Comparison</h3>
+        <button onClick={onClose} className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-[#1a1a25] transition-colors">
+          <CloseIcon size={16} />
         </button>
       </div>
 
-      {/* Side by side */}
       <div className={`grid gap-4 ${papers.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-        {paperData.map((paper, i) => (
-          <div key={paper.id} className="bg-black/30 rounded-lg border border-white/10 p-4 space-y-3">
-            <h4 className="text-white font-semibold text-sm">{paper.title}</h4>
+        {paperData.map((paper) => (
+          <div key={paper.id} className="bg-[#0a0a0f] rounded-lg border border-[#222230] p-4 space-y-3">
+            <h4 className="text-zinc-200 font-medium text-sm">{paper.title}</h4>
 
-            <div className="text-xs space-y-1 text-blue-200/70">
-              <div><span className="font-medium text-blue-200">ID:</span> {paper.id}</div>
-              <div><span className="font-medium text-blue-200">Year:</span> {paper.year || 'N/A'}</div>
-              <div><span className="font-medium text-blue-200">Chunks:</span> {paper.chunks?.length || 0}</div>
-              <div><span className="font-medium text-blue-200">Link:</span> {paper.url ? 'Available' : 'N/A'}</div>
+            <div className="text-xs space-y-1">
+              {[
+                { label: 'Year', value: paper.year || 'N/A' },
+                { label: 'Chunks', value: paper.chunks?.length || 0 },
+                { label: 'Link', value: paper.url ? 'Available' : 'N/A' },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between text-zinc-500">
+                  <span>{label}</span>
+                  <span className="text-zinc-400">{value}</span>
+                </div>
+              ))}
             </div>
 
-            {/* Key Terms */}
             <div>
-              <div className="text-xs font-semibold text-blue-200 mb-1">Key Terms</div>
+              <div className="text-xs text-zinc-500 mb-1.5">Key Terms</div>
               <div className="flex flex-wrap gap-1">
                 {paper.terms.map(term => (
                   <span
                     key={term}
-                    className={`px-2 py-0.5 rounded-full text-xs ${
+                    className={`px-2 py-0.5 rounded text-xs ${
                       commonTerms.includes(term)
-                        ? 'bg-green-500/20 text-green-300'
-                        : 'bg-purple-500/20 text-purple-300'
+                        ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                        : 'bg-[#1a1a25] text-zinc-400 border border-[#2a2a3a]'
                     }`}
                   >
                     {term}
                   </span>
                 ))}
-                {paper.terms.length === 0 && <span className="text-blue-200/40 text-xs">No key terms detected</span>}
+                {paper.terms.length === 0 && <span className="text-zinc-600 text-xs">No terms detected</span>}
               </div>
             </div>
 
-            {/* Abstract */}
             <div>
-              <div className="text-xs font-semibold text-blue-200 mb-1">Text Preview</div>
-              <p className="text-blue-200/70 text-xs leading-relaxed line-clamp-6">
+              <div className="text-xs text-zinc-500 mb-1.5">Preview</div>
+              <p className="text-zinc-500 text-xs leading-relaxed line-clamp-6">
                 {paper.abstract || 'No text available'}
               </p>
             </div>
@@ -72,11 +70,10 @@ export default function ComparisonView({ papers, onClose }) {
         ))}
       </div>
 
-      {/* Common terms */}
       {commonTerms.length > 0 && (
-        <div className="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-          <span className="text-sm font-medium text-green-300">Common themes: </span>
-          <span className="text-sm text-green-200/80">{commonTerms.join(', ')}</span>
+        <div className="mt-4 p-3 bg-green-500/5 rounded-lg border border-green-500/10">
+          <span className="text-xs text-zinc-500">Common themes: </span>
+          <span className="text-xs text-zinc-400">{commonTerms.join(', ')}</span>
         </div>
       )}
     </div>

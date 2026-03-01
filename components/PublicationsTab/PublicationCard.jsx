@@ -1,14 +1,17 @@
 'use client';
 import { useBookmarks } from '../../context/BookmarkContext';
+import { StarIcon, StarFilledIcon, ExternalLinkIcon } from '../../ui/Icons';
 
-export default function PublicationCard({ publication, index, onSelect, compareMode, isCompareSelected, onToggleCompare }) {
+export default function PublicationCard({ publication, onSelect, compareMode, isCompareSelected, onToggleCompare }) {
   const { isPaperBookmarked, togglePaperBookmark } = useBookmarks();
   const bookmarked = isPaperBookmarked(publication.id);
 
   return (
     <div
-      className={`bg-black/30 backdrop-blur-sm rounded-lg border p-4 hover:bg-black/40 transition-all duration-200 cursor-pointer group ${
-        isCompareSelected ? 'border-purple-500/50 ring-1 ring-purple-500/30' : 'border-white/10 hover:border-white/20'
+      className={`bg-[#12121a] rounded-xl border p-5 transition-all duration-200 cursor-pointer group ${
+        isCompareSelected
+          ? 'border-indigo-500/50 ring-1 ring-indigo-500/20'
+          : 'border-[#2a2a3a] hover:border-[#3a3a4a] hover:bg-[#1a1a25]'
       }`}
       onClick={() => {
         if (compareMode) {
@@ -20,33 +23,32 @@ export default function PublicationCard({ publication, index, onSelect, compareM
         }
       }}
     >
-      <div className="flex items-start justify-between mb-2">
-        <h4 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-blue-200 transition-colors flex-1 mr-2">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h4 className="text-zinc-200 font-medium text-sm line-clamp-2 group-hover:text-zinc-100 transition-colors flex-1">
           {publication.title}
         </h4>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            togglePaperBookmark(publication);
-          }}
-          className={`text-lg transition-colors flex-shrink-0 ${bookmarked ? 'text-yellow-400' : 'text-blue-200/30 hover:text-yellow-400'}`}
+          onClick={(e) => { e.stopPropagation(); togglePaperBookmark(publication); }}
+          className={`p-1 rounded transition-colors flex-shrink-0 ${bookmarked ? 'text-indigo-400' : 'text-zinc-600 hover:text-indigo-400'}`}
           aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
         >
-          {bookmarked ? '\u2605' : '\u2606'}
+          {bookmarked ? <StarFilledIcon size={14} /> : <StarIcon size={14} />}
         </button>
       </div>
-      <div className="flex items-center justify-between text-xs text-blue-200/70">
+
+      <div className="flex items-center justify-between text-xs text-zinc-500 mt-3">
+        <div className="flex items-center space-x-2">
+          {publication.year && <span>{publication.year}</span>}
+          {publication.chunks?.length > 0 && <span>{publication.chunks.length} chunks</span>}
+        </div>
         <div className="flex items-center space-x-2">
           {publication.url && (
-            <span className="text-green-300 bg-green-500/20 px-2 py-1 rounded-full text-xs">
-              {'\uD83D\uDD17'} Link
+            <span className="inline-flex items-center text-zinc-500">
+              <ExternalLinkIcon size={12} className="mr-0.5" /> Link
             </span>
           )}
-          <span className="text-purple-300 bg-purple-500/20 px-2 py-1 rounded-full">
-            #{index + 1}
-          </span>
           {compareMode && (
-            <span className={`px-2 py-1 rounded-full text-xs ${isCompareSelected ? 'bg-purple-500/30 text-purple-300' : 'bg-black/30 text-blue-200/50'}`}>
+            <span className={`px-2 py-0.5 rounded text-xs ${isCompareSelected ? 'bg-indigo-500/15 text-indigo-400' : 'bg-[#1a1a25] text-zinc-500'}`}>
               {isCompareSelected ? 'Selected' : 'Select'}
             </span>
           )}

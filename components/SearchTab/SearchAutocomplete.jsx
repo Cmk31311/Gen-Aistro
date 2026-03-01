@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import useDebounce from '../../hooks/useDebounce';
+import { SearchIcon } from '../../ui/Icons';
 
 export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -10,24 +11,18 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
   const debouncedValue = useDebounce(value, 200);
   const wrapperRef = useRef(null);
 
-  // Load suggestion terms from stats and graph
   useEffect(() => {
     Promise.all([
       fetch('/data/stats.json').then(r => r.json()).catch(() => null),
       fetch('/api/graph').then(r => r.json()).catch(() => null)
     ]).then(([stats, graph]) => {
       const allTerms = new Set();
-      if (stats?.top_keywords) {
-        stats.top_keywords.forEach(k => allTerms.add(k.term));
-      }
-      if (graph?.nodes) {
-        graph.nodes.forEach(n => allTerms.add(n.id));
-      }
+      if (stats?.top_keywords) stats.top_keywords.forEach(k => allTerms.add(k.term));
+      if (graph?.nodes) graph.nodes.forEach(n => allTerms.add(n.id));
       setTerms(Array.from(allTerms));
     });
   }, []);
 
-  // Filter suggestions
   const filtered = useMemo(() => {
     if (!debouncedValue || debouncedValue.length < 2) return [];
     const lower = debouncedValue.toLowerCase();
@@ -39,7 +34,6 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
     setSelectedIndex(-1);
   }, [filtered]);
 
-  // Close on outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -73,23 +67,26 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
 
   return (
     <div ref={wrapperRef} className="relative">
-      <textarea
-        ref={inputRef}
-        value={value}
-        onChange={(e) => { onChange(e.target.value); setShowSuggestions(true); }}
-        onFocus={() => setShowSuggestions(true)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask a question about NASA Space Biology research..."
-        className="w-full px-4 py-3 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-blue-200/60 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-        rows={3}
-      />
+      <div className="relative">
+        <SearchIcon size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
+        <textarea
+          ref={inputRef}
+          value={value}
+          onChange={(e) => { onChange(e.target.value); setShowSuggestions(true); }}
+          onFocus={() => setShowSuggestions(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask a question about NASA Space Biology research..."
+          className="w-full pl-10 pr-4 py-3.5 bg-[#0a0a0f] border border-[#2a2a3a] rounded-xl text-zinc-200 text-base placeholder-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none transition-colors"
+          rows={2}
+        />
+      </div>
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-30 w-full mt-1 bg-slate-900/95 backdrop-blur-md rounded-lg border border-white/20 shadow-xl overflow-hidden">
+        <div className="absolute z-30 w-full mt-1 bg-[#12121a] rounded-lg border border-[#2a2a3a] shadow-xl shadow-black/40 overflow-hidden">
           {suggestions.map((term, i) => (
             <button
               key={term}
-              className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                i === selectedIndex ? 'bg-purple-500/30 text-white' : 'text-blue-200 hover:bg-white/10'
+              className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                i === selectedIndex ? 'bg-[#1a1a25] text-zinc-100' : 'text-zinc-400 hover:bg-[#1a1a25] hover:text-zinc-200'
               }`}
               onClick={() => {
                 const words = value.split(' ');
@@ -98,7 +95,6 @@ export default function SearchAutocomplete({ value, onChange, inputRef, onSubmit
                 setShowSuggestions(false);
               }}
             >
-              <span className="text-purple-300 mr-2">{'\uD83D\uDD0D'}</span>
               {term}
             </button>
           ))}
