@@ -1,18 +1,6 @@
 
-// Cache the pipeline so the model loads only once
-let embedder = null;
-
-async function getEmbedder() {
-  if (!embedder) {
-    console.log('Loading embedding model (first request may be slow)...');
-    const { pipeline } = await import('@huggingface/transformers');
-    embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-      dtype: 'fp32',
-    });
-    console.log('Embedding model loaded');
-  }
-  return embedder;
-}
+const HF_MODEL = 'sentence-transformers/all-MiniLM-L6-v2';
+const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/pipeline/feature-extraction`;
 
 export async function POST(req) {
   try {
@@ -32,21 +20,68 @@ export async function POST(req) {
       );
     }
 
-    const extractor = await getEmbedder();
-    const output = await extractor(text.trim(), { pooling: 'mean', normalize: true });
+    if (!process.env.HUGGINGFACE_API_KEY) {
+      return Response.json(
+        { error: 'HUGGINGFACE_API_KEY is not configured' },
+        { status: 500 }
+      );
+    }
 
-    // Convert to plain array
-    const embedding = Array.from(output.data);
+    const response = await fetch(HF_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`
+      },
+      body: JSON.stringify({
+        inputs: text.trim(),
+        options: { wait_for_model: true }
+      })
+    });
 
-    if (embedding.length !== 384) {
-      console.error('Unexpected embedding dimension:', embedding.length);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('HuggingFace API error:', response.status, errorText);
+
+      if (response.status === 503) {
+        return Response.json(
+          { error: 'Embedding model is loading. Please try again in a few seconds.', retry: true },
+          { status: 503 }
+        );
+      }
+
+      return Response.json(
+        { error: 'Failed to generate embedding' },
+        { status: 500 }
+      );
+    }
+
+    const embedding = await response.json();
+
+    // HuggingFace returns per-token embeddings as nested array — mean pool them
+    let vector = embedding;
+    if (Array.isArray(embedding) && Array.isArray(embedding[0])) {
+      const tokenCount = embedding.length;
+      vector = new Array(embedding[0].length).fill(0);
+      for (let i = 0; i < tokenCount; i++) {
+        for (let j = 0; j < embedding[i].length; j++) {
+          vector[j] += embedding[i][j];
+        }
+      }
+      for (let j = 0; j < vector.length; j++) {
+        vector[j] /= tokenCount;
+      }
+    }
+
+    if (!Array.isArray(vector) || vector.length !== 384) {
+      console.error('Unexpected embedding shape:', typeof vector, Array.isArray(vector) ? vector.length : 'not array');
       return Response.json(
         { error: 'Unexpected embedding format from model' },
         { status: 500 }
       );
     }
 
-    return Response.json({ embedding });
+    return Response.json({ embedding: vector });
 
   } catch (error) {
     console.error('Embed API error:', error);
