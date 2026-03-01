@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // No special configuration needed
+  experimental: {
+    serverComponentsExternalPackages: ['@huggingface/transformers'],
+    outputFileTracingExcludes: {
+      '*': ['./node_modules/@huggingface/transformers/dist/ort-wasm*'],
+    },
+  },
 };
 
 module.exports = nextConfig;
