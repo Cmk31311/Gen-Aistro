@@ -34,3 +34,4 @@ export const DatabaseIcon = (p) => <I {...p}><ellipse cx="12" cy="5" rx="9" ry="
 export const TrendingUpIcon = (p) => <I {...p}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></I>;
 export const ZapIcon = (p) => <I {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></I>;
 export const ChatIcon = (p) => <I {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></I>;
+export const FlaskIcon = (p) => <I {...p}><path d="M9 3h6v6l5 9a1 1 0 0 1-.9 1.5H4.9A1 1 0 0 1 4 18l5-9V3z"/><path d="M9 3h6"/><path d="M7.5 15h9"/></I>;

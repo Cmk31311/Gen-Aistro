@@ -8,9 +8,10 @@ import SearchTab from './SearchTab/SearchTab';
 import PublicationsTab from './PublicationsTab/PublicationsTab';
 import AnalyticsTab from './AnalyticsTab/AnalyticsTab';
 import InsightsTab from './InsightsTab/InsightsTab';
+import DeepResearchTab from './DeepResearchTab';
 import BookmarksPanel from './BookmarksPanel';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
-import { StarIcon, SunIcon, MoonIcon, KeyboardIcon, RocketIcon, DatabaseIcon, TrendingUpIcon, ZapIcon, SparklesIcon } from '../ui/Icons';
+import { StarIcon, SunIcon, MoonIcon, KeyboardIcon, RocketIcon, DatabaseIcon, TrendingUpIcon, ZapIcon, SparklesIcon, FlaskIcon } from '../ui/Icons';
 
 export default function AppShell() {
   const [activeTab, setActiveTab] = useState(TABS.SEARCH);
@@ -31,6 +32,7 @@ export default function AppShell() {
   useKeyboardShortcut('2', useCallback(() => setActiveTab(TABS.GRAPH), []));
   useKeyboardShortcut('3', useCallback(() => setActiveTab(TABS.ANALYTICS), []));
   useKeyboardShortcut('4', useCallback(() => setActiveTab(TABS.INSIGHTS), []));
+  useKeyboardShortcut('5', useCallback(() => setActiveTab(TABS.RESEARCH), []));
   useKeyboardShortcut('b', useCallback(() => setShowBookmarks(prev => !prev), []), { ctrl: true });
   useKeyboardShortcut('?', useCallback(() => setShowShortcuts(prev => !prev), []));
   useKeyboardShortcut('Escape', useCallback(() => {
@@ -42,7 +44,8 @@ export default function AppShell() {
     { key: TABS.SEARCH, label: 'Search', icon: RocketIcon },
     { key: TABS.GRAPH, label: 'Publications', icon: DatabaseIcon },
     { key: TABS.ANALYTICS, label: 'Analytics', icon: TrendingUpIcon },
-    { key: TABS.INSIGHTS, label: 'Insights', icon: ZapIcon }
+    { key: TABS.INSIGHTS, label: 'Insights', icon: ZapIcon },
+    { key: TABS.RESEARCH, label: 'Research', icon: FlaskIcon }
   ];
 
   return (
@@ -137,6 +140,7 @@ export default function AppShell() {
             {activeTab === TABS.GRAPH && <PublicationsTab />}
             {activeTab === TABS.ANALYTICS && <AnalyticsTab />}
             {activeTab === TABS.INSIGHTS && <InsightsTab />}
+            {activeTab === TABS.RESEARCH && <DeepResearchTab />}
           </div>
         </main>
 
