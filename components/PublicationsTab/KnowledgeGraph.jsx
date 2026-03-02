@@ -10,23 +10,22 @@ const NODE_COLORS = {
   other: '#87837E'
 };
 
-// Force-directed layout — clusters spaced apart, nodes spaced within, 50px center gap
+// Force-directed layout — clusters grouped by type, nodes readable with spacing
 function forceSimulation(nodes, links, width, height) {
   const cx = width / 2;
   const cy = height / 2;
-  const CENTER_GAP = 25;
-  const MIN_NODE_SPACING = 50;
+  const MIN_NODE_SPACING = 45;
 
-  // Group by type — place each group in its own zone
+  // Group by type
   const groups = {};
   nodes.forEach(n => {
     if (!groups[n.type]) groups[n.type] = [];
     groups[n.type].push(n);
   });
   const typeKeys = Object.keys(groups);
-  const clusterRadius = Math.min(width, height) * 0.33;
+  // Clusters closer to center so no big empty hole
+  const clusterRadius = Math.min(width, height) * 0.22;
 
-  // Store group centers for cluster gravity
   const groupCenters = {};
   typeKeys.forEach((type, gi) => {
     const angle = (2 * Math.PI * gi) / typeKeys.length - Math.PI / 2;
@@ -34,7 +33,6 @@ function forceSimulation(nodes, links, width, height) {
     const gcy = cy + clusterRadius * Math.sin(angle);
     groupCenters[type] = { x: gcx, y: gcy };
     const count = groups[type].length;
-    // Place nodes in a loose grid within each cluster
     const cols = Math.ceil(Math.sqrt(count));
     groups[type].forEach((n, i) => {
       const row = Math.floor(i / cols);
@@ -53,16 +51,15 @@ function forceSimulation(nodes, links, width, height) {
     const alpha = 1 - iter / 400;
     const decay = alpha * 0.4;
 
-    // Repulsion between all nodes
+    // Repulsion — uniform for all pairs, just enough to keep nodes readable
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const dx = nodes[j].x - nodes[i].x;
         const dy = nodes[j].y - nodes[i].y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         const sameType = nodes[i].type === nodes[j].type;
-        // Same-type: enforce minimum spacing; cross-type: push apart harder
-        const crossMult = sameType ? 1 : 3;
-        const force = (700 * crossMult * decay) / (dist * dist);
+        const crossMult = sameType ? 1 : 1.5;
+        const force = (500 * crossMult * decay) / (dist * dist);
         const fx = dx / dist * force;
         const fy = dy / dist * force;
         nodes[i].vx -= fx;
@@ -70,9 +67,9 @@ function forceSimulation(nodes, links, width, height) {
         nodes[j].vx += fx;
         nodes[j].vy += fy;
 
-        // Hard minimum spacing within same cluster
-        if (sameType && dist < MIN_NODE_SPACING) {
-          const push = (MIN_NODE_SPACING - dist) * 0.1;
+        // Hard minimum spacing so labels don't overlap
+        if (dist < MIN_NODE_SPACING) {
+          const push = (MIN_NODE_SPACING - dist) * 0.12;
           nodes[i].vx -= (dx / dist) * push;
           nodes[i].vy -= (dy / dist) * push;
           nodes[j].vx += (dx / dist) * push;
@@ -81,7 +78,7 @@ function forceSimulation(nodes, links, width, height) {
       }
     }
 
-    // Attraction along links — very weak for cross-type
+    // Attraction along links
     links.forEach(l => {
       const source = nodeMap[l.source];
       const target = nodeMap[l.target];
@@ -90,8 +87,8 @@ function forceSimulation(nodes, links, width, height) {
       const dy = target.y - source.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
       const crossType = source.type !== target.type;
-      const ideal = crossType ? 250 : 70;
-      const strength = crossType ? 0.001 : 0.004;
+      const ideal = crossType ? 150 : 65;
+      const strength = crossType ? 0.002 : 0.005;
       const force = (dist - ideal) * strength * decay;
       const fx = dx / dist * force;
       const fy = dy / dist * force;
@@ -101,30 +98,18 @@ function forceSimulation(nodes, links, width, height) {
       target.vy -= fy;
     });
 
-    // Cluster gravity — pull nodes toward their group center
+    // Cluster gravity — keep same-type nodes grouped
     nodes.forEach(n => {
       const gc = groupCenters[n.type];
       if (!gc) return;
-      n.vx += (gc.x - n.x) * 0.004 * decay;
-      n.vy += (gc.y - n.y) * 0.004 * decay;
+      n.vx += (gc.x - n.x) * 0.005 * decay;
+      n.vy += (gc.y - n.y) * 0.005 * decay;
     });
 
-    // Soft global center gravity
+    // Global center gravity — pull everything toward center, no gap
     nodes.forEach(n => {
-      n.vx += (cx - n.x) * 0.0002 * decay;
-      n.vy += (cy - n.y) * 0.0002 * decay;
-    });
-
-    // Center repulsion — 50px clear gap in the middle
-    nodes.forEach(n => {
-      const dx = n.x - cx;
-      const dy = n.y - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      if (dist < CENTER_GAP) {
-        const push = (CENTER_GAP - dist) * 0.05;
-        n.vx += (dx / dist) * push;
-        n.vy += (dy / dist) * push;
-      }
+      n.vx += (cx - n.x) * 0.0005 * decay;
+      n.vy += (cy - n.y) * 0.0005 * decay;
     });
 
     nodes.forEach(n => {
