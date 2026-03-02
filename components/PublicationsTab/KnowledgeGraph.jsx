@@ -14,7 +14,7 @@ const NODE_COLORS = {
 function forceSimulation(nodes, links, width, height) {
   const cx = width / 2;
   const cy = height / 2;
-  const CENTER_GAP = 50;
+  const CENTER_GAP = 25;
   const MIN_NODE_SPACING = 50;
 
   // Group by type — place each group in its own zone
