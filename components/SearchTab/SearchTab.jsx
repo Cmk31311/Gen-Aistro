@@ -8,8 +8,9 @@ import SearchFilters from './SearchFilters';
 import SourceCard from './SourceCard';
 import CitationPanel from './CitationPanel';
 import SearchAutocomplete from './SearchAutocomplete';
+import ChatPanel from './ChatPanel';
 import ErrorState from '../../ui/ErrorState';
-import { SearchIcon, StarIcon, CopyIcon, ShareIcon, ExportIcon, ChevronDownIcon, ChevronUpIcon, SettingsIcon, SparklesIcon } from '../../ui/Icons';
+import { SearchIcon, StarIcon, CopyIcon, ShareIcon, ExportIcon, ChevronDownIcon, ChevronUpIcon, SettingsIcon, SparklesIcon, ChatIcon } from '../../ui/Icons';
 
 export default function SearchTab() {
   const [query, setQuery] = useState('');
@@ -25,6 +26,7 @@ export default function SearchTab() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({ includeKeywords: [], excludeKeywords: [] });
+  const [showChat, setShowChat] = useState(false);
   const searchInputRef = useRef(null);
   const { addSearchBookmark } = useBookmarks();
 
@@ -49,6 +51,7 @@ export default function SearchTab() {
     setSources([]);
     setMetadata(null);
     setShowCitation(false);
+    setShowChat(false);
     setSearchHistory(prev => [query, ...prev.filter(q => q !== query).slice(0, 9)]);
 
     try {
@@ -192,6 +195,9 @@ export default function SearchTab() {
               <button onClick={() => exportSearchResults(query, answer, sources)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Export">
                 <ExportIcon size={16} />
               </button>
+              <button onClick={() => setShowChat(true)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Follow-up Chat">
+                <ChatIcon size={16} />
+              </button>
             </div>
           </div>
           <div className="text-content-2 text-sm leading-relaxed whitespace-pre-wrap">{answer}</div>
@@ -219,6 +225,14 @@ export default function SearchTab() {
           </div>
         </div>
       )}
+
+      <ChatPanel
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
+        initialQuery={query}
+        initialAnswer={answer}
+        chunks={sources}
+      />
     </div>
   );
 }

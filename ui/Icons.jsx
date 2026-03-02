@@ -33,3 +33,4 @@ export const RocketIcon = (p) => <I {...p}><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s
 export const DatabaseIcon = (p) => <I {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></I>;
 export const TrendingUpIcon = (p) => <I {...p}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></I>;
 export const ZapIcon = (p) => <I {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></I>;
+export const ChatIcon = (p) => <I {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></I>;

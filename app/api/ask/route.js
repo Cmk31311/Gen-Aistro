@@ -210,11 +210,26 @@ export async function POST(req) {
     // Add to rate limit
     addRateLimit(ip);
     
-    const { question, chunks, temperature = 0.2, max_tokens = 800 } = await req.json();
-    
+    const { question, chunks, temperature = 0.2, max_tokens = 800, conversation_history } = await req.json();
+
     // Validate inputs
     validateInput(question, chunks, temperature, max_tokens);
-    
+
+    // Validate conversation_history if provided
+    if (conversation_history) {
+      if (!Array.isArray(conversation_history)) {
+        throw new Error('conversation_history must be an array');
+      }
+      if (conversation_history.length > 30) {
+        throw new Error('Conversation history too long (max 30 messages)');
+      }
+      for (const msg of conversation_history) {
+        if (!msg.role || !msg.content || !['user', 'assistant'].includes(msg.role)) {
+          throw new Error('Each message must have a valid role (user/assistant) and content');
+        }
+      }
+    }
+
     // Check for API key
     if (!process.env.GROQ_API_KEY) {
       console.error('GROQ_API_KEY not configured');
@@ -223,29 +238,58 @@ export async function POST(req) {
         { status: 500 }
       );
     }
-    
-    // Check if context is sufficient
-    const isContextSufficient = await checkContextSufficiency(question, chunks);
-    let webContext = null;
+
+    let groqMessages;
+    let isContextSufficient = true;
     let usedWebSearch = false;
-    
-    // If context is insufficient, search the web
-    if (!isContextSufficient) {
-      console.log('Context insufficient, searching web for:', question);
-      webContext = await searchWeb(question);
-      usedWebSearch = webContext !== null;
+
+    if (conversation_history && conversation_history.length > 0) {
+      // Multi-turn chat mode: system prompt with sources + conversation history
+      const contextText = chunks.map((chunk) => {
+        const citation = `[[${chunk.doc_title}${chunk.year ? ` (${chunk.year})` : ''}]]`;
+        return `${citation}\n${chunk.text}`;
+      }).join('\n\n');
+
+      const systemPrompt = `You are a knowledgeable assistant helping users explore NASA Space Biology research. Answer follow-up questions using the provided research context and conversation history.
+
+CRITICAL INSTRUCTIONS:
+1. Prioritize information from NASA Space Biology research publications.
+2. Always cite sources using the format [[Title (Year)]] for NASA publications.
+3. Be precise and scientific in your language.
+4. Keep your answer concise but comprehensive.
+5. Use conversation history for context but always ground answers in the source material.
+
+NASA RESEARCH CONTEXT:
+${contextText}`;
+
+      groqMessages = [
+        { role: 'system', content: systemPrompt },
+        ...conversation_history,
+      ];
+    } else {
+      // Single-turn mode (original behavior)
+      const webContext = await (async () => {
+        isContextSufficient = await checkContextSufficiency(question, chunks);
+        if (!isContextSufficient) {
+          console.log('Context insufficient, searching web for:', question);
+          const ctx = await searchWeb(question);
+          usedWebSearch = ctx !== null;
+          return ctx;
+        }
+        return null;
+      })();
+
+      const prompt = buildPrompt(question, chunks, temperature, max_tokens, webContext);
+      groqMessages = [{ role: 'user', content: prompt }];
     }
-    
-    // Build prompt with optional web context
-    const prompt = buildPrompt(question, chunks, temperature, max_tokens, webContext);
-    
+
     // Prepare Groq API request
     const groqRequest = {
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
+      messages: groqMessages,
       temperature: temperature,
-      max_tokens: Math.min(max_tokens, 1000), // Cap at 1000
-      stream: false, // Start with non-streaming for simplicity
+      max_tokens: Math.min(max_tokens, 1000),
+      stream: false,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0

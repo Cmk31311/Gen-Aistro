@@ -42,7 +42,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const page = Math.max(0, parseInt(searchParams.get('page') || '0', 10));
-    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
+    const limit = Math.max(1, parseInt(searchParams.get('limit') || '50', 10));
     const search = (searchParams.get('search') || '').trim().toLowerCase();
 
     let publications = getMetadata();
