@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePapers } from '../../context/PapersContext';
 
@@ -22,14 +22,28 @@ const NODE_COLORS = {
 export default function KnowledgeGraph({ onNodeClick }) {
   const { graphData } = usePapers();
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const graphRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const measure = () => {
+      const w = containerRef.current?.clientWidth;
+      if (w && w > 0) setContainerWidth(w);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const processedData = useMemo(() => {
     if (!graphData?.nodes) return { nodes: [], links: [] };
     const nodes = graphData.nodes.map(n => ({
       ...n,
       color: NODE_COLORS[n.type] || NODE_COLORS.other,
-      val: Math.max(n.size || 10, 5)
+      val: Math.max(n.count || n.size || 10, 5)
     }));
     const nodeIds = new Set(nodes.map(n => n.id));
     const links = (graphData.links || [])
@@ -96,15 +110,17 @@ export default function KnowledgeGraph({ onNodeClick }) {
         <span className="text-xs text-content-3 ml-auto font-medium">{processedData.nodes.length} entities &middot; {processedData.links.length} relationships</span>
       </div>
 
-      <div className="bg-bg rounded-xl border border-border overflow-hidden shadow-inner-glow" style={{ height: '500px' }}>
-        <ForceGraph2D
-          ref={graphRef} graphData={processedData} nodeCanvasObject={nodeCanvasObject} linkColor={linkColor}
-          linkWidth={link => Math.min(Math.log((link.weight || 1) + 1) * 0.5, 3)}
-          onNodeHover={setHoveredNode} onNodeClick={(node) => onNodeClick?.(node.id)}
-          backgroundColor="transparent" width={undefined} height={500}
-          d3AlphaDecay={0.02} d3VelocityDecay={0.3} cooldownTime={3000}
-          enableZoomInteraction={true} enablePanInteraction={true}
-        />
+      <div ref={containerRef} className="bg-bg rounded-xl border border-border overflow-hidden shadow-inner-glow" style={{ height: '500px' }}>
+        {containerWidth > 0 && (
+          <ForceGraph2D
+            ref={graphRef} graphData={processedData} nodeCanvasObject={nodeCanvasObject} linkColor={linkColor}
+            linkWidth={link => Math.min(Math.log((link.weight || 1) + 1) * 0.5, 3)}
+            onNodeHover={setHoveredNode} onNodeClick={(node) => onNodeClick?.(node.id)}
+            backgroundColor="transparent" width={containerWidth} height={500}
+            d3AlphaDecay={0.02} d3VelocityDecay={0.3} cooldownTime={3000}
+            enableZoomInteraction={true} enablePanInteraction={true}
+          />
+        )}
       </div>
 
       {hoveredNode && (
