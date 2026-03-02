@@ -132,7 +132,7 @@ export default function PublicationsTab() {
       )}
 
       {viewMode === 'graph' ? (
-        <div className="bg-surface-1 rounded-xl border border-border p-6 shadow-card">
+        <div>
           <KnowledgeGraph onNodeClick={(term) => { setGraphFilter(term); setViewMode('list'); }} />
         </div>
       ) : (
