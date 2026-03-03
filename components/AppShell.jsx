@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { TABS } from '../lib/constants';
 import { useTheme } from '../context/ThemeContext';
 import { useBookmarks } from '../context/BookmarkContext';
+import { useAuth } from '../context/AuthContext';
 import useKeyboardShortcut from '../hooks/useKeyboardShortcut';
 import SearchTab from './SearchTab/SearchTab';
 import PublicationsTab from './PublicationsTab/PublicationsTab';
@@ -19,6 +20,7 @@ export default function AppShell() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const { toggleTheme, isDark } = useTheme();
   const { paperCount } = useBookmarks();
+  const { user } = useAuth();
 
   useKeyboardShortcut('k', useCallback(() => {
     setActiveTab(TABS.SEARCH);
@@ -72,6 +74,18 @@ export default function AppShell() {
               </div>
 
               <div className="flex items-center space-x-1">
+                {/* My Datasets / Sign In */}
+                {user ? (
+                  <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                    <DatabaseIcon size={14} />
+                    <span>My Datasets</span>
+                  </a>
+                ) : (
+                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                    Sign In
+                  </a>
+                )}
+
                 {/* Action buttons */}
                 <button onClick={() => setShowBookmarks(true)} className="relative p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" aria-label="Open bookmarks">
                   <StarIcon size={16} />
