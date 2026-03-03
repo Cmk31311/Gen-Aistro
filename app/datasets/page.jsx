@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
+import { getSupabase } from '../../lib/supabase';
 import UploadWizard from '../../components/UploadWizard';
 import { SparklesIcon, DatabaseIcon } from '../../ui/Icons';
 
@@ -22,7 +22,7 @@ export default function DatasetsPage() {
 
   const fetchDatasets = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
       if (!session) return;
 
       const res = await fetch('/api/datasets', {

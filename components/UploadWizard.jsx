@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import Papa from 'papaparse';
 import { detectColumns } from '../lib/columnDetector';
 import { chunkText } from '../lib/chunker';
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 const BATCH_SIZE = 20;
 
@@ -107,7 +107,7 @@ export default function UploadWizard({ onComplete, onCancel }) {
       setProgress({ current: 0, total: allChunks.length, status: 'Creating dataset...' });
 
       // Get auth token
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error('Not authenticated');
 

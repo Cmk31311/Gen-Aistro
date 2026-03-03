@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { supabase } from '../../../lib/supabase';
+import { getSupabase } from '../../../lib/supabase';
 import { SparklesIcon, SearchIcon, ChatIcon, DatabaseIcon } from '../../../ui/Icons';
 
 export default function DatasetDashboard() {
@@ -34,7 +34,7 @@ export default function DatasetDashboard() {
   }, [chatHistory]);
 
   const getToken = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await getSupabase().auth.getSession();
     return session?.access_token;
   };
 
