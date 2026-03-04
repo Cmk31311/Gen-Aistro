@@ -186,10 +186,12 @@ as $$
   )
 
   -- 6. Exact matches first, then hybrid results
-  select * from exact_match
-  union all
-  select * from fused_chunks
-    where id not in (select id from exact_match)
+  select * from (
+    select * from exact_match
+    union all
+    select * from fused_chunks
+      where id not in (select id from exact_match)
+  ) combined
   order by
     case match_type when 'exact' then 0 else 1 end,
     score desc

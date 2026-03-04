@@ -127,20 +127,32 @@ export async function POST(req, { params }) {
 
     // Final fallback: keyword-filtered client-side cosine similarity
     if (!results || results.length === 0) {
-      const { data: keywordChunks } = await supabase
+      const escaped = query.replace(/'/g, "''");
+      const { data: titleChunks } = await supabase
         .from('chunks')
         .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
         .eq('dataset_id', id)
-        .or(`doc_title.ilike.%${query}%,text.ilike.%${query}%`)
-        .limit(500);
+        .ilike('doc_title', `%${escaped}%`)
+        .limit(100);
 
-      const { data: allChunks } = (!keywordChunks || keywordChunks.length === 0)
-        ? await supabase
+      const { data: textChunks } = await supabase
+        .from('chunks')
+        .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
+        .eq('dataset_id', id)
+        .ilike('text', `%${escaped}%`)
+        .limit(400);
+
+      let merged = [...(titleChunks || []), ...(textChunks || [])];
+      const seen = new Set();
+      merged = merged.filter(c => seen.has(c.id) ? false : seen.add(c.id));
+
+      const { data: allChunks } = merged.length > 0
+        ? { data: merged }
+        : await supabase
             .from('chunks')
             .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
             .eq('dataset_id', id)
-            .limit(500)
-        : { data: keywordChunks };
+            .limit(500);
 
       if (allChunks && allChunks.length > 0) {
         const scored = allChunks.map((chunk) => {

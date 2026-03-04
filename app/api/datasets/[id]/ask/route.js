@@ -145,22 +145,36 @@ async function searchChunks(supabase, datasetId, queryText, queryEmbedding, topK
   }
 
   // Fallback: keyword-filtered client-side cosine similarity
-  const { data: chunks, error: fetchErr } = await supabase
+  // Try title match first (exact name queries)
+  const escaped = queryText.replace(/'/g, "''");
+  const { data: titleChunks } = await supabase
     .from('chunks')
     .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
     .eq('dataset_id', datasetId)
-    .or(`doc_title.ilike.%${queryText}%,text.ilike.%${queryText}%`)
-    .limit(500);
+    .ilike('doc_title', `%${escaped}%`)
+    .limit(100);
 
-  // If keyword filter returns nothing, fetch without filter
-  const fetchData = (!fetchErr && chunks && chunks.length > 0) ? chunks : await (async () => {
+  // Then text keyword search
+  const { data: textChunks } = await supabase
+    .from('chunks')
+    .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
+    .eq('dataset_id', datasetId)
+    .ilike('text', `%${escaped}%`)
+    .limit(400);
+
+  // Merge, dedup, fallback to all chunks if nothing found
+  let fetchData = [...(titleChunks || []), ...(textChunks || [])];
+  const seen = new Set();
+  fetchData = fetchData.filter(c => seen.has(c.id) ? false : seen.add(c.id));
+
+  if (fetchData.length === 0) {
     const { data: all } = await supabase
       .from('chunks')
       .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
       .eq('dataset_id', datasetId)
       .limit(500);
-    return all || [];
-  })();
+    fetchData = all || [];
+  }
 
   if (!fetchData || fetchData.length === 0) return [];
 
