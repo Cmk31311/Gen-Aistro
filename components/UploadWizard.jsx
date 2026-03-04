@@ -62,10 +62,7 @@ export default function UploadWizard({ onComplete, onCancel }) {
   };
 
   const startProcessing = async () => {
-    if (!mapping.text) {
-      setError('Please select a text/content column.');
-      return;
-    }
+    // Text column is optional — we build rich text from all columns anyway
 
     setProcessing(true);
     setError('');
@@ -273,7 +270,7 @@ export default function UploadWizard({ onComplete, onCancel }) {
           {/* Column mapping */}
           <div className="space-y-3 mb-6">
             {[
-              { role: 'text', label: 'Text / Content', required: true },
+              { role: 'text', label: 'Text / Content', required: false },
               { role: 'title', label: 'Title', required: false },
               { role: 'year', label: 'Year', required: false },
               { role: 'url', label: 'URL / DOI', required: false },
@@ -335,8 +332,7 @@ export default function UploadWizard({ onComplete, onCancel }) {
             </button>
             <button
               onClick={startProcessing}
-              disabled={!mapping.text}
-              className="ml-auto px-6 py-2 bg-gradient-to-r from-accent to-accent-hover text-black font-semibold rounded-lg text-sm hover:shadow-glow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-auto px-6 py-2 bg-gradient-to-r from-accent to-accent-hover text-black font-semibold rounded-lg text-sm hover:shadow-glow transition-all"
             >
               Start Processing
             </button>
