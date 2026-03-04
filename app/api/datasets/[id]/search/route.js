@@ -73,38 +73,69 @@ export async function POST(req, { params }) {
     }
 
     const queryEmbedding = await embedQuery(query);
+    const embeddingStr = `[${queryEmbedding.join(',')}]`;
 
-    // pgvector cosine distance search
-    const { data: results, error: searchError } = await supabase.rpc('match_chunks', {
-      query_embedding: JSON.stringify(queryEmbedding),
-      match_dataset_id: id,
-      match_count: Math.min(topK, 20),
-    });
+    // Try RPC first
+    let results = null;
+    let searchError = null;
 
-    if (searchError) {
-      // Fallback: direct query if RPC not set up yet
-      const { data: chunks } = await supabase
-        .from('chunks')
-        .select('id, doc_id, doc_title, year, url, chunk_index, text')
-        .eq('dataset_id', id)
-        .limit(200);
-
-      // Client-side cosine similarity fallback
-      const scored = (chunks || []).map((chunk) => {
-        // We don't have embeddings in the select for payload size reasons
-        // This fallback just returns the first N chunks
-        return { ...chunk, score: 0 };
+    try {
+      const rpcRes = await supabase.rpc('match_chunks', {
+        query_embedding: embeddingStr,
+        match_dataset_id: id,
+        match_count: Math.min(topK, 20),
       });
-
-      return Response.json({
-        results: scored.slice(0, topK),
-        metadata: { fallback: true, total: scored.length },
-      });
+      if (rpcRes.error) throw rpcRes.error;
+      results = rpcRes.data;
+    } catch (e) {
+      searchError = e;
     }
 
+    // Fallback: raw SQL via Supabase
+    if (!results || results.length === 0) {
+      try {
+        const { data: sqlResults, error: sqlErr } = await supabase
+          .from('chunks')
+          .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
+          .eq('dataset_id', id)
+          .limit(500);
+
+        if (!sqlErr && sqlResults && sqlResults.length > 0) {
+          // Client-side cosine similarity
+          const scored = sqlResults.map((chunk) => {
+            let emb = chunk.embedding;
+            if (typeof emb === 'string') {
+              // Parse pgvector string format "[0.1,0.2,...]"
+              emb = emb.replace(/[\[\]]/g, '').split(',').map(Number);
+            }
+            if (!Array.isArray(emb) || emb.length === 0) {
+              return { ...chunk, score: 0, embedding: undefined };
+            }
+            // Cosine similarity
+            let dot = 0, magA = 0, magB = 0;
+            for (let i = 0; i < emb.length; i++) {
+              dot += queryEmbedding[i] * emb[i];
+              magA += queryEmbedding[i] * queryEmbedding[i];
+              magB += emb[i] * emb[i];
+            }
+            const score = magA && magB ? dot / (Math.sqrt(magA) * Math.sqrt(magB)) : 0;
+            return { ...chunk, score, embedding: undefined };
+          });
+
+          scored.sort((a, b) => b.score - a.score);
+          results = scored.slice(0, topK);
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback search error:', fallbackErr);
+      }
+    }
+
+    // Strip embedding from results
+    const cleanResults = (results || []).map(({ embedding, ...rest }) => rest);
+
     return Response.json({
-      results: results || [],
-      metadata: { total: (results || []).length },
+      results: cleanResults,
+      metadata: { total: cleanResults.length, used_rpc: !searchError },
     });
   } catch (error) {
     console.error('Search error:', error);

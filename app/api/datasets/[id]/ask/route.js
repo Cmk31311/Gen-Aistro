@@ -32,6 +32,56 @@ async function embedQuery(text) {
   return raw;
 }
 
+function cosineSimilarity(a, b) {
+  let dot = 0, magA = 0, magB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    magA += a[i] * a[i];
+    magB += b[i] * b[i];
+  }
+  return magA && magB ? dot / (Math.sqrt(magA) * Math.sqrt(magB)) : 0;
+}
+
+async function searchChunks(supabase, datasetId, queryEmbedding, topK = 8) {
+  const embeddingStr = `[${queryEmbedding.join(',')}]`;
+
+  // Try RPC first
+  try {
+    const { data, error } = await supabase.rpc('match_chunks', {
+      query_embedding: embeddingStr,
+      match_dataset_id: datasetId,
+      match_count: topK,
+    });
+    if (!error && data && data.length > 0) return data;
+  } catch (e) {
+    // RPC not available, fall through
+  }
+
+  // Fallback: fetch chunks with embeddings and compute client-side
+  const { data: chunks, error: fetchErr } = await supabase
+    .from('chunks')
+    .select('id, doc_id, doc_title, year, url, chunk_index, text, embedding')
+    .eq('dataset_id', datasetId)
+    .limit(500);
+
+  if (fetchErr || !chunks || chunks.length === 0) return [];
+
+  const scored = chunks.map((chunk) => {
+    let emb = chunk.embedding;
+    if (typeof emb === 'string') {
+      emb = emb.replace(/[\[\]]/g, '').split(',').map(Number);
+    }
+    if (!Array.isArray(emb) || emb.length === 0) {
+      return { ...chunk, score: 0, embedding: undefined };
+    }
+    const score = cosineSimilarity(queryEmbedding, emb);
+    return { ...chunk, score, embedding: undefined };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, topK);
+}
+
 export async function POST(req, { params }) {
   try {
     const { id } = await params;
@@ -64,29 +114,9 @@ export async function POST(req, { params }) {
       return Response.json({ error: 'Question is required' }, { status: 400 });
     }
 
-    // Search for relevant chunks
+    // Search for relevant chunks using vector similarity
     const queryEmbedding = await embedQuery(question);
-
-    let chunks = [];
-
-    // Try pgvector RPC first
-    const { data: rpcResults, error: rpcError } = await supabase.rpc('match_chunks', {
-      query_embedding: JSON.stringify(queryEmbedding),
-      match_dataset_id: id,
-      match_count: 8,
-    });
-
-    if (!rpcError && rpcResults) {
-      chunks = rpcResults;
-    } else {
-      // Fallback: fetch chunks and do client-side search
-      const { data: allChunks } = await supabase
-        .from('chunks')
-        .select('doc_id, doc_title, year, url, text')
-        .eq('dataset_id', id)
-        .limit(50);
-      chunks = allChunks || [];
-    }
+    const chunks = await searchChunks(supabase, id, queryEmbedding, 8);
 
     if (chunks.length === 0) {
       return Response.json({
