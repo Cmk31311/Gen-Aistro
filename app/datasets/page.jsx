@@ -19,6 +19,7 @@ export default function DatasetsPage() {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchDatasets = async () => {
     try {
@@ -46,6 +47,28 @@ export default function DatasetsPage() {
     }
     if (user) fetchDatasets();
   }, [user, authLoading]);
+
+  const handleDelete = async (e, dsId) => {
+    e.stopPropagation();
+    if (!confirm('Delete this dataset and all its data? This cannot be undone.')) return;
+    setDeletingId(dsId);
+    try {
+      const { data: { session } } = await getSupabase().auth.getSession();
+      const res = await fetch('/api/datasets', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ id: dsId }),
+      });
+      if (res.ok) setDatasets((prev) => prev.filter((d) => d.id !== dsId));
+    } catch (err) {
+      console.error('Delete failed:', err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleUploadComplete = (datasetId) => {
     setShowUpload(false);
@@ -130,7 +153,7 @@ export default function DatasetsPage() {
               ) : (
                 <div className="grid gap-4">
                   {datasets.map((ds) => (
-                    <button
+                    <div
                       key={ds.id}
                       onClick={() => {
                         if (ds.status === 'ready') router.push(`/dashboard/${ds.id}`);
@@ -141,9 +164,18 @@ export default function DatasetsPage() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-base font-semibold text-content-1">{ds.name}</h3>
-                        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_COLORS[ds.status] || STATUS_COLORS.pending}`}>
-                          {ds.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_COLORS[ds.status] || STATUS_COLORS.pending}`}>
+                            {ds.status}
+                          </span>
+                          <button
+                            onClick={(e) => handleDelete(e, ds.id)}
+                            disabled={deletingId === ds.id}
+                            className="text-xs px-2.5 py-1 rounded-lg border border-red-400/20 text-red-400 hover:bg-red-400/10 transition-all disabled:opacity-50"
+                          >
+                            {deletingId === ds.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </div>
                       </div>
                       {ds.description && (
                         <p className="text-sm text-content-3 mb-2">{ds.description}</p>
@@ -167,7 +199,7 @@ export default function DatasetsPage() {
                           </p>
                         </div>
                       )}
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}

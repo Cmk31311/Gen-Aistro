@@ -72,3 +72,38 @@ export async function POST(req) {
     return Response.json({ error: 'Failed to create dataset' }, { status: 500 });
   }
 }
+
+export async function DELETE(req) {
+  try {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const supabase = createServerClient();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { id } = await req.json();
+    if (!id) return Response.json({ error: 'Dataset ID required' }, { status: 400 });
+
+    // Verify ownership before deleting
+    const { data: dataset } = await supabase
+      .from('datasets')
+      .select('id, user_id')
+      .eq('id', id)
+      .single();
+
+    if (!dataset || dataset.user_id !== user.id) {
+      return Response.json({ error: 'Dataset not found' }, { status: 404 });
+    }
+
+    // Chunks are deleted by cascade (ON DELETE CASCADE in schema)
+    const { error } = await supabase.from('datasets').delete().eq('id', id);
+    if (error) throw error;
+
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error('Datasets DELETE error:', error);
+    return Response.json({ error: 'Failed to delete dataset' }, { status: 500 });
+  }
+}
