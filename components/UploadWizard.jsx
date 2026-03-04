@@ -76,15 +76,34 @@ export default function UploadWizard({ onComplete, onCancel }) {
       const allChunks = [];
       for (let i = 0; i < allRows.length; i++) {
         const row = allRows[i];
-        const text = row[mapping.text];
-        if (!text || text.trim().length === 0) continue;
 
         const docTitle = mapping.title ? row[mapping.title] : `Row ${i + 1}`;
         const year = mapping.year ? parseInt(row[mapping.year]) || null : null;
         const url = mapping.url ? row[mapping.url] : null;
         const docId = mapping.doc_id ? row[mapping.doc_id] : `doc_${i}`;
 
-        const chunks = chunkText(text);
+        // Build rich text: always include the title/name + all other columns
+        // so searches like "tell me about Aguemour 008" can find the row
+        const primaryText = mapping.text ? row[mapping.text] : '';
+        const otherFields = headers
+          .filter(h => h !== mapping.text && h !== mapping.url)
+          .map(h => {
+            const val = row[h];
+            if (!val || String(val).trim() === '') return null;
+            return `${h}: ${val}`;
+          })
+          .filter(Boolean)
+          .join('\n');
+
+        // Combine: "Name: Aguemour 008\nyear: 1992\nrecclass: L5\n..." + primary text
+        const fullText = [docTitle ? `Name: ${docTitle}` : null, otherFields, primaryText]
+          .filter(Boolean)
+          .join('\n')
+          .trim();
+
+        if (!fullText) continue;
+
+        const chunks = chunkText(fullText);
         for (const chunk of chunks) {
           allChunks.push({
             text: chunk.text,
