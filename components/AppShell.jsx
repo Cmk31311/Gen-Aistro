@@ -74,14 +74,14 @@ export default function AppShell() {
               </div>
 
               <div className="flex items-center space-x-1">
-                {/* My Datasets / Sign In */}
-                {user ? (
-                  <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
-                    <DatabaseIcon size={14} />
-                    <span>My Datasets</span>
-                  </a>
-                ) : (
-                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                {/* My Datasets — always visible; redirects to login if not signed in */}
+                <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                  <DatabaseIcon size={14} />
+                  <span>My Datasets</span>
+                </a>
+                {/* Sign In — only when logged out */}
+                {!user && (
+                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm border border-accent/30 text-accent hover:bg-accent/10 rounded-lg transition-all font-medium">
                     Sign In
                   </a>
                 )}
