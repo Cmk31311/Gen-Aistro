@@ -74,14 +74,14 @@ export default function AppShell() {
               </div>
 
               <div className="flex items-center space-x-1">
-                {/* My Datasets — always visible; redirects to login if not signed in */}
-                <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                {/* My Datasets — always visible */}
+                <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 rounded-lg transition-all">
                   <DatabaseIcon size={14} />
                   <span>My Datasets</span>
                 </a>
                 {/* Sign In — only when logged out */}
                 {!user && (
-                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm border border-accent/30 text-accent hover:bg-accent/10 rounded-lg transition-all font-medium">
+                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
                     Sign In
                   </a>
                 )}
@@ -160,11 +160,6 @@ export default function AppShell() {
 
         <footer className="mt-16">
           <div className="h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
-          <div className="max-w-6xl mx-auto px-6 py-8">
-            <p className="text-center text-content-3 text-xs">
-              Powered by NASA Space Biology research data &middot; Built with Next.js and Groq AI
-            </p>
-          </div>
         </footer>
       </div>
 
