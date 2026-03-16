@@ -74,18 +74,6 @@ export default function AppShell() {
               </div>
 
               <div className="flex items-center space-x-1">
-                {/* My Datasets — always visible */}
-                <a href="/datasets" className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 rounded-lg transition-all">
-                  <DatabaseIcon size={14} />
-                  <span>My Datasets</span>
-                </a>
-                {/* Sign In — only when logged out */}
-                {!user && (
-                  <a href="/login" className="hidden sm:flex items-center px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
-                    Sign In
-                  </a>
-                )}
-
                 {/* Action buttons */}
                 <button onClick={() => setShowBookmarks(true)} className="relative p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" aria-label="Open bookmarks">
                   <StarIcon size={16} />
@@ -120,6 +108,19 @@ export default function AppShell() {
                     </button>
                   ))}
                 </nav>
+
+                {/* My Datasets + Sign In — far right */}
+                <div className="hidden sm:flex items-center gap-2 ml-4 pl-4 border-l border-border">
+                  <a href="/datasets" className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium bg-accent/10 border border-accent/25 text-accent hover:bg-accent/20 rounded-lg transition-all">
+                    <DatabaseIcon size={14} />
+                    <span>My Datasets</span>
+                  </a>
+                  {!user && (
+                    <a href="/login" className="flex items-center px-3 py-1.5 text-sm text-content-3 hover:text-accent hover:bg-surface-2 rounded-lg transition-all">
+                      Sign In
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
