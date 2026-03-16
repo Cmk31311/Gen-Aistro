@@ -142,7 +142,7 @@ export default function DatasetsPage() {
                 <div className="text-center py-16">
                   <DatabaseIcon size={48} className="text-content-3/30 mx-auto mb-4" />
                   <h3 className="text-lg text-content-2 mb-2">No datasets yet</h3>
-                  <p className="text-sm text-content-3 mb-6">Upload a CSV file to get started with AI-powered research exploration.</p>
+                  <p className="text-sm text-content-3 mb-6">Upload a CSV, TXT, MD, or PDF file to get started with AI-powered research exploration.</p>
                   <button
                     onClick={() => setShowUpload(true)}
                     className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-hover text-black font-semibold rounded-lg text-sm hover:shadow-glow transition-all"

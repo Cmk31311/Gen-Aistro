@@ -30,7 +30,7 @@ export default function ComparisonView({ papers, onClose }) {
             <div className="text-xs space-y-1.5">
               {[
                 { label: 'Year', value: paper.year || 'N/A' },
-                { label: 'Chunks', value: paper.chunks?.length || 0 },
+                { label: 'Chunks', value: paper.chunkCount || 0 },
                 { label: 'Link', value: paper.url ? 'Available' : 'N/A' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-content-3">

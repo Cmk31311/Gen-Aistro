@@ -1,32 +1,5 @@
 
-// Rate limiting (simple in-memory store)
-const rateLimitStore = new Map();
-const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
-const RATE_LIMIT_MAX_REQUESTS = 30;
-
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW;
-  
-  // Clean old entries
-  for (const [key, timestamp] of rateLimitStore.entries()) {
-    if (timestamp < windowStart) {
-      rateLimitStore.delete(key);
-    }
-  }
-  
-  // Check current IP
-  const requests = Array.from(rateLimitStore.entries())
-    .filter(([key, timestamp]) => key.startsWith(ip) && timestamp >= windowStart);
-  
-  return requests.length < RATE_LIMIT_MAX_REQUESTS;
-}
-
-function addRateLimit(ip) {
-  const now = Date.now();
-  const key = `${ip}_${now}`;
-  rateLimitStore.set(key, now);
-}
+import { checkRateLimit } from '../../../lib/rateLimiter';
 
 async function searchWeb(query) {
   try {
@@ -199,16 +172,14 @@ export async function POST(req) {
                req.headers.get('x-real-ip') || 
                'unknown';
     
-    // Check rate limit
-    if (!checkRateLimit(ip)) {
+    // Check distributed rate limit (Supabase-backed, works across serverless instances)
+    const { allowed } = await checkRateLimit(ip, 'ask', 30);
+    if (!allowed) {
       return Response.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
-    
-    // Add to rate limit
-    addRateLimit(ip);
     
     const { question, chunks, temperature = 0.2, max_tokens = 800, conversation_history } = await req.json();
 
@@ -283,88 +254,107 @@ ${contextText}`;
       groqMessages = [{ role: 'user', content: prompt }];
     }
 
-    // Prepare Groq API request
-    const groqRequest = {
-      model: "llama-3.3-70b-versatile",
-      messages: groqMessages,
-      temperature: temperature,
-      max_tokens: Math.min(max_tokens, 1000),
-      stream: false,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0
-    };
-    
-    // Call Groq API
+    // Call Groq API with streaming enabled
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
       },
-      body: JSON.stringify(groqRequest)
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: groqMessages,
+        temperature: temperature,
+        max_tokens: Math.min(max_tokens, 1000),
+        stream: true,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0
+      })
     });
-    
+
     if (!groqResponse.ok) {
       const errorText = await groqResponse.text();
       console.error('Groq API error:', groqResponse.status, errorText);
-      
       if (groqResponse.status === 401) {
-        return Response.json(
-          { error: 'Invalid API key' },
-          { status: 500 }
-        );
+        return Response.json({ error: 'Invalid API key' }, { status: 500 });
       } else if (groqResponse.status === 429) {
-        return Response.json(
-          { error: 'Groq API rate limit exceeded. Please try again later.' },
-          { status: 429 }
-        );
+        return Response.json({ error: 'Groq API rate limit exceeded. Please try again later.' }, { status: 429 });
       } else {
-        return Response.json(
-          { error: 'Failed to generate response. Please try again.' },
-          { status: 500 }
-        );
+        return Response.json({ error: 'Failed to generate response. Please try again.' }, { status: 500 });
       }
     }
-    
-    const data = await groqResponse.json();
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid Groq response:', data);
-      return Response.json(
-        { error: 'Invalid response from AI service' },
-        { status: 500 }
-      );
-    }
-    
-    const answer = data.choices[0].message.content;
-    
-    // Extract sources from answer for metadata
-    const sourceMatches = answer.match(/\[\[([^\]]+)\]\]/g);
-    const sources = sourceMatches ? sourceMatches.map(match => match.slice(2, -2)) : [];
-    
-    return Response.json({
-      answer: answer,
-      metadata: {
-        sources_cited: sources,
-        chunks_used: chunks.length,
-        temperature: temperature,
-        max_tokens: max_tokens,
-        model: "llama-3.3-70b-versatile",
-        used_web_search: usedWebSearch,
-        context_sufficient: isContextSufficient
+
+    // Stream tokens to client, then emit a final metadata event
+    const encoder = new TextEncoder();
+    const chunksMeta = chunks; // captured for metadata closure
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = groqResponse.body.getReader();
+        const decoder = new TextDecoder();
+        let fullAnswer = '';
+        let buffer = '';
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const data = line.slice(6).trim();
+              if (data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                const token = parsed.choices?.[0]?.delta?.content ?? '';
+                if (token) {
+                  fullAnswer += token;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
+                }
+              } catch {}
+            }
+          }
+
+          // Send final metadata event
+          const sourceMatches = fullAnswer.match(/\[\[([^\]]+)\]\]/g);
+          const sources = sourceMatches ? sourceMatches.map(m => m.slice(2, -2)) : [];
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            done: true,
+            metadata: {
+              sources_cited: sources,
+              chunks_used: chunksMeta.length,
+              temperature,
+              max_tokens,
+              model: 'llama-3.3-70b-versatile',
+              used_web_search: usedWebSearch,
+              context_sufficient: isContextSufficient,
+            }
+          })}\n\n`));
+        } catch (err) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
+        } finally {
+          controller.close();
+        }
       }
     });
-    
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+
   } catch (error) {
     console.error('Ask API error:', error);
-    
-    // Don't expose internal errors
     return Response.json(
-      { 
-        error: 'An error occurred while processing your request. Please try again.',
-        answer: null
-      },
+      { error: 'An error occurred while processing your request. Please try again.', answer: null },
       { status: 500 }
     );
   }

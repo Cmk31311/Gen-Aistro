@@ -7,12 +7,16 @@ import { getSupabase } from '../lib/supabase';
 
 const BATCH_SIZE = 20;
 
+const ACCEPTED_TYPES = '.csv,.txt,.md,.pdf';
+
 export default function UploadWizard({ onComplete, onCancel }) {
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
+  const [fileType, setFileType] = useState('csv'); // 'csv' | 'text' | 'pdf'
   const [headers, setHeaders] = useState([]);
   const [preview, setPreview] = useState([]);
   const [allRows, setAllRows] = useState([]);
+  const [plainText, setPlainText] = useState(''); // for txt/md/pdf
   const [mapping, setMapping] = useState({ text: null, title: null, year: null, url: null, doc_id: null });
   const [datasetName, setDatasetName] = useState('');
   const [datasetDesc, setDatasetDesc] = useState('');
@@ -21,34 +25,59 @@ export default function UploadWizard({ onComplete, onCancel }) {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
-  const handleFileSelect = useCallback((f) => {
-    if (!f || !f.name.endsWith('.csv')) {
-      setError('Please select a CSV file.');
+  const handleFileSelect = useCallback(async (f) => {
+    if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    const supported = ['csv', 'txt', 'md', 'pdf'];
+    if (!supported.includes(ext)) {
+      setError(`Unsupported file type. Please upload: ${supported.join(', ')}`);
       return;
     }
     setError('');
     setFile(f);
-    setDatasetName(f.name.replace('.csv', ''));
+    setDatasetName(f.name.replace(/\.[^.]+$/, ''));
 
-    Papa.parse(f, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        if (results.errors.length > 0 && results.data.length === 0) {
-          setError('Failed to parse CSV: ' + results.errors[0].message);
-          return;
-        }
-        const cols = results.meta.fields || [];
-        setHeaders(cols);
-        setPreview(results.data.slice(0, 5));
-        setAllRows(results.data);
-        setMapping(detectColumns(cols));
-        setStep(2);
-      },
-      error: (err) => {
-        setError('Failed to read file: ' + err.message);
-      },
-    });
+    if (ext === 'csv') {
+      setFileType('csv');
+      Papa.parse(f, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          if (results.errors.length > 0 && results.data.length === 0) {
+            setError('Failed to parse CSV: ' + results.errors[0].message);
+            return;
+          }
+          const cols = results.meta.fields || [];
+          setHeaders(cols);
+          setPreview(results.data.slice(0, 5));
+          setAllRows(results.data);
+          setMapping(detectColumns(cols));
+          setStep(2);
+        },
+        error: (err) => setError('Failed to read file: ' + err.message),
+      });
+    } else if (ext === 'txt' || ext === 'md') {
+      setFileType('text');
+      const text = await f.text();
+      setPlainText(text);
+      setStep(2);
+    } else if (ext === 'pdf') {
+      setFileType('pdf');
+      setProgress({ current: 0, total: 0, status: 'Extracting PDF text...' });
+      setStep(2);
+      try {
+        const formData = new FormData();
+        formData.append('file', f);
+        const res = await fetch('/api/parse-document', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'PDF extraction failed');
+        setPlainText(data.text || '');
+        setProgress({ current: 0, total: 0, status: '' });
+      } catch (err) {
+        setError(err.message);
+        setStep(1);
+      }
+    }
   }, []);
 
   const handleDrop = useCallback((e) => {
@@ -62,54 +91,73 @@ export default function UploadWizard({ onComplete, onCancel }) {
   };
 
   const startProcessing = async () => {
-    // Text column is optional — we build rich text from all columns anyway
-
     setProcessing(true);
     setError('');
     setStep(3);
 
     try {
-      // Build chunks from all rows
+      // Build chunks depending on file type
       const allChunks = [];
-      for (let i = 0; i < allRows.length; i++) {
-        const row = allRows[i];
 
-        const docTitle = mapping.title ? row[mapping.title] : `Row ${i + 1}`;
-        const year = mapping.year ? parseInt(row[mapping.year]) || null : null;
-        const url = mapping.url ? row[mapping.url] : null;
-        const docId = mapping.doc_id ? row[mapping.doc_id] : `doc_${i}`;
-
-        // Build rich text: always include the title/name + all other columns
-        // so searches like "tell me about Aguemour 008" can find the row
-        const primaryText = mapping.text ? row[mapping.text] : '';
-        const otherFields = headers
-          .filter(h => h !== mapping.text && h !== mapping.url)
-          .map(h => {
-            const val = row[h];
-            if (!val || String(val).trim() === '') return null;
-            return `${h}: ${val}`;
-          })
-          .filter(Boolean)
-          .join('\n');
-
-        // Combine: "Name: Aguemour 008\nyear: 1992\nrecclass: L5\n..." + primary text
-        const fullText = [docTitle ? `Name: ${docTitle}` : null, otherFields, primaryText]
-          .filter(Boolean)
-          .join('\n')
-          .trim();
-
-        if (!fullText) continue;
-
-        const chunks = chunkText(fullText);
+      if (fileType === 'text' || fileType === 'pdf') {
+        // Single document: chunk the full plain text
+        if (!plainText.trim()) {
+          setError('No text content found in the file.');
+          setProcessing(false);
+          setStep(2);
+          return;
+        }
+        const chunks = chunkText(plainText);
         for (const chunk of chunks) {
           allChunks.push({
             text: chunk.text,
             chunk_index: chunk.chunk_index,
-            doc_title: docTitle,
-            doc_id: docId,
-            year,
-            url,
+            doc_title: datasetName,
+            doc_id: 'doc_0',
+            year: null,
+            url: null,
           });
+        }
+      } else {
+        // CSV: build chunks from all rows
+        for (let i = 0; i < allRows.length; i++) {
+          const row = allRows[i];
+
+          const docTitle = mapping.title ? row[mapping.title] : `Row ${i + 1}`;
+          const year = mapping.year ? parseInt(row[mapping.year]) || null : null;
+          const url = mapping.url ? row[mapping.url] : null;
+          const docId = mapping.doc_id ? row[mapping.doc_id] : `doc_${i}`;
+
+          // Build rich text: always include the title/name + all other columns
+          const primaryText = mapping.text ? row[mapping.text] : '';
+          const otherFields = headers
+            .filter(h => h !== mapping.text && h !== mapping.url)
+            .map(h => {
+              const val = row[h];
+              if (!val || String(val).trim() === '') return null;
+              return `${h}: ${val}`;
+            })
+            .filter(Boolean)
+            .join('\n');
+
+          const fullText = [docTitle ? `Name: ${docTitle}` : null, otherFields, primaryText]
+            .filter(Boolean)
+            .join('\n')
+            .trim();
+
+          if (!fullText) continue;
+
+          const chunks = chunkText(fullText);
+          for (const chunk of chunks) {
+            allChunks.push({
+              text: chunk.text,
+              chunk_index: chunk.chunk_index,
+              doc_title: docTitle,
+              doc_id: docId,
+              year,
+              url,
+            });
+          }
         }
       }
 
@@ -226,13 +274,19 @@ export default function UploadWizard({ onComplete, onCancel }) {
             className="border-2 border-dashed border-border hover:border-accent/50 rounded-xl p-12 text-center cursor-pointer transition-all hover:bg-surface-2/50"
           >
             <div className="text-4xl mb-3">📄</div>
-            <p className="text-content-2 mb-1">Drag & drop your CSV file here</p>
+            <p className="text-content-2 mb-1">Drag & drop your file here</p>
             <p className="text-content-3 text-sm">or click to browse</p>
+            <div className="flex justify-center gap-2 mt-4 flex-wrap">
+              {['CSV', 'TXT', 'MD', 'PDF*'].map(t => (
+                <span key={t} className="px-2.5 py-1 bg-surface-2 text-content-3 rounded-md text-xs border border-border font-medium">{t}</span>
+              ))}
+            </div>
+            <p className="text-content-3/60 text-xs mt-2">*PDF requires <code className="bg-surface-2 px-1 rounded">npm install pdf-parse</code></p>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept={ACCEPTED_TYPES}
             className="hidden"
             onChange={(e) => handleFileSelect(e.target.files?.[0])}
           />
@@ -240,7 +294,44 @@ export default function UploadWizard({ onComplete, onCancel }) {
       )}
 
       {/* Step 2: Column Mapping */}
-      {step === 2 && (
+      {step === 2 && (fileType === 'text' || fileType === 'pdf') && (
+        <div>
+          <h3 className="text-lg font-semibold text-content-1 mb-1">Confirm document details</h3>
+          <p className="text-sm text-content-3 mb-4">
+            Extracted {plainText.length.toLocaleString()} characters from <strong>{file?.name}</strong>
+          </p>
+          <div className="mb-4">
+            <label className="block text-sm text-content-3 mb-1">Dataset name</label>
+            <input
+              value={datasetName}
+              onChange={(e) => setDatasetName(e.target.value)}
+              className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-content-1 focus:outline-none focus:border-accent/50 transition-all text-sm"
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm text-content-3 mb-1">Description (optional)</label>
+            <input
+              value={datasetDesc}
+              onChange={(e) => setDatasetDesc(e.target.value)}
+              className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-content-1 focus:outline-none focus:border-accent/50 transition-all text-sm"
+              placeholder="Brief description"
+            />
+          </div>
+          <div className="mb-6 bg-surface-2/50 rounded-xl border border-border p-4">
+            <p className="text-xs text-content-3 mb-1 font-medium">Text preview</p>
+            <p className="text-xs text-content-2 line-clamp-6 whitespace-pre-wrap">{plainText.slice(0, 600)}...</p>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => { setStep(1); setFile(null); setPlainText(''); }} className="px-4 py-2 text-sm text-content-3 hover:text-content-1 transition-colors">Back</button>
+            <button onClick={onCancel} className="px-4 py-2 text-sm text-content-3 hover:text-content-1 transition-colors">Cancel</button>
+            <button onClick={startProcessing} className="ml-auto px-6 py-2 bg-gradient-to-r from-accent to-accent-hover text-black font-semibold rounded-lg text-sm hover:shadow-glow transition-all">
+              Start Processing
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && fileType === 'csv' && (
         <div>
           <h3 className="text-lg font-semibold text-content-1 mb-1">Map your columns</h3>
           <p className="text-sm text-content-3 mb-4">

@@ -1,30 +1,84 @@
 'use client';
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useBookmarks } from '../../context/BookmarkContext';
-import { usePapers } from '../../context/PapersContext';
-import { extractKeyTerms, getPublicationAbstract } from '../../lib/paperUtils';
-import { cosineSimilarity } from '../../utils/cosine';
+import { useAuth } from '../../context/AuthContext';
+import { getSupabase } from '../../lib/supabase';
+import { extractKeyTerms } from '../../lib/paperUtils';
 import { StarIcon, StarFilledIcon, ExternalLinkIcon, CloseIcon } from '../../ui/Icons';
 
 export default function PublicationDetail({ publication, onClose }) {
   const { isPaperBookmarked, togglePaperBookmark, bookmarks, addToReadingList } = useBookmarks();
-  const { publications } = usePapers();
+  const { user } = useAuth();
   const bookmarked = isPaperBookmarked(publication.id);
-  const abstract = getPublicationAbstract(publication);
-  const keyTerms = extractKeyTerms(publication.title + ' ' + abstract);
 
-  const similarPapers = useMemo(() => {
-    if (!publication.chunks?.[0]?.embedding || publications.length < 2) return [];
-    const queryEmb = publication.chunks[0].embedding;
-    return publications
-      .filter(p => p.id !== publication.id && p.chunks?.[0]?.embedding)
-      .map(p => ({ ...p, similarity: cosineSimilarity(queryEmb, p.chunks[0].embedding) }))
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 5);
-  }, [publication, publications]);
+  const [detail, setDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [annotations, setAnnotations] = useState([]);
+  const [noteInput, setNoteInput] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
+  // Load annotations for this paper
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`/api/annotations?paper_id=${encodeURIComponent(publication.id)}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) setAnnotations(await res.json());
+    })();
+  }, [publication.id, user]);
+
+  async function handleSaveNote() {
+    if (!noteInput.trim() || !user) return;
+    setSavingNote(true);
+    try {
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/annotations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ paper_id: publication.id, note: noteInput.trim() }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setAnnotations(prev => [saved, ...prev]);
+        setNoteInput('');
+      }
+    } finally {
+      setSavingNote(false);
+    }
+  }
+
+  async function handleDeleteAnnotation(id) {
+    const supabase = getSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    await fetch(`/api/annotations?id=${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    setAnnotations(prev => prev.filter(a => a.id !== id));
+  }
+
+  // Lazy-load text chunks + similar papers from API (keeps initial bundle small)
+  useEffect(() => {
+    setDetail(null);
+    setDetailLoading(true);
+    fetch(`/api/papers/${encodeURIComponent(publication.id)}`)
+      .then(r => r.json())
+      .then(data => setDetail(data))
+      .catch(() => setDetail(null))
+      .finally(() => setDetailLoading(false));
+  }, [publication.id]);
+
+  const abstract = detail?.chunks?.[0]?.text?.substring(0, 500) || '';
+  const keyTerms = extractKeyTerms(publication.title + ' ' + abstract);
+  const similarPapers = detail?.similarPapers || [];
 
   return (
-    <div className="mt-6 bg-surface-1 rounded-xl border border-border p-7 animate-slide-up shadow-card">
+    <div className="mt-6 bg-surface-1 rounded-xl border border-border p-4 sm:p-7 animate-slide-up shadow-card">
       <div className="flex items-start justify-between mb-6">
         <div className="flex-1 mr-4">
           <h3 className="text-lg font-bold text-gradient-gold tracking-tight">{publication.title}</h3>
@@ -46,10 +100,10 @@ export default function PublicationDetail({ publication, onClose }) {
       </div>
 
       <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label: 'Year', value: publication.year || 'N/A' },
-            { label: 'Chunks', value: `${publication.chunks?.length || 0} segments` },
+            { label: 'Chunks', value: `${publication.chunkCount || 0} segments` },
             { label: 'Status', value: publication.url ? 'Online' : 'Metadata only' },
             { label: 'ID', value: publication.id },
           ].map(({ label, value }) => (
@@ -71,11 +125,41 @@ export default function PublicationDetail({ publication, onClose }) {
           </div>
         )}
 
-        {abstract && (
-          <div>
-            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Text Preview</h4>
-            <p className="text-content-2 text-sm leading-relaxed">{abstract}...</p>
+        {detailLoading ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-2.5 bg-surface-2 rounded w-1/3" />
+            <div className="h-2.5 bg-surface-2 rounded" />
+            <div className="h-2.5 bg-surface-2 rounded w-4/5" />
+            <div className="h-2.5 bg-surface-2 rounded w-2/3" />
           </div>
+        ) : (
+          <>
+            {abstract && (
+              <div>
+                <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Text Preview</h4>
+                <p className="text-content-2 text-sm leading-relaxed">{abstract}...</p>
+              </div>
+            )}
+
+            {similarPapers.length > 0 && (
+              <div>
+                <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Similar Papers</h4>
+                <div className="space-y-2">
+                  {similarPapers.map(paper => (
+                    <div key={paper.id} className="flex items-center justify-between p-3.5 bg-bg rounded-xl border border-border hover:border-accent/20 cursor-pointer transition-all group" onClick={() => paper.url && window.open(paper.url, '_blank', 'noopener,noreferrer')}>
+                      <span className="text-content-2 text-sm line-clamp-1 flex-1 mr-3 group-hover:text-content-1">{paper.title}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="w-16 h-1.5 bg-surface-2 rounded-full overflow-hidden">
+                          <div className="h-full bg-accent/50 rounded-full" style={{ width: `${paper.similarity * 100}%` }} />
+                        </div>
+                        <span className="text-xs text-accent font-medium w-8 text-right">{(paper.similarity * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {bookmarks.readingLists.length > 0 && (
@@ -91,22 +175,41 @@ export default function PublicationDetail({ publication, onClose }) {
           </div>
         )}
 
-        {similarPapers.length > 0 && (
+        {user && (
           <div>
-            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Similar Papers</h4>
-            <div className="space-y-2">
-              {similarPapers.map(paper => (
-                <div key={paper.id} className="flex items-center justify-between p-3.5 bg-bg rounded-xl border border-border hover:border-accent/20 cursor-pointer transition-all group" onClick={() => paper.url && window.open(paper.url, '_blank', 'noopener,noreferrer')}>
-                  <span className="text-content-2 text-sm line-clamp-1 flex-1 mr-3 group-hover:text-content-1">{paper.title}</span>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="w-16 h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                      <div className="h-full bg-accent/50 rounded-full" style={{ width: `${paper.similarity * 100}%` }} />
-                    </div>
-                    <span className="text-xs text-accent font-medium w-8 text-right">{(paper.similarity * 100).toFixed(0)}%</span>
-                  </div>
-                </div>
-              ))}
+            <h4 className="text-[11px] uppercase tracking-[0.1em] text-content-3 mb-3 font-medium">Notes</h4>
+            <div className="flex gap-2 mb-3">
+              <textarea
+                value={noteInput}
+                onChange={e => setNoteInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSaveNote(); }}
+                placeholder="Add a note… (⌘↵ to save)"
+                rows={2}
+                className="flex-1 px-3 py-2 bg-bg border border-border rounded-lg text-sm text-content-1 placeholder-content-3 resize-none focus:outline-none focus:border-accent/50 transition-colors"
+              />
+              <button
+                onClick={handleSaveNote}
+                disabled={savingNote || !noteInput.trim()}
+                className="px-4 py-2 bg-accent text-bg rounded-lg text-xs font-medium hover:bg-accent/90 disabled:opacity-40 transition-all self-start"
+              >
+                {savingNote ? '…' : 'Save'}
+              </button>
             </div>
+            {annotations.length > 0 && (
+              <div className="space-y-2">
+                {annotations.map(ann => (
+                  <div key={ann.id} className="group flex items-start gap-2 p-3 bg-bg rounded-lg border border-border">
+                    <p className="flex-1 text-sm text-content-2 leading-relaxed">{ann.note}</p>
+                    <button
+                      onClick={() => handleDeleteAnnotation(ann.id)}
+                      className="opacity-0 group-hover:opacity-100 text-content-3 hover:text-red-400 transition-all text-xs px-1 flex-shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

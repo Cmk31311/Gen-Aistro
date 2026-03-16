@@ -80,6 +80,133 @@ as $$
 $$;
 
 -- ============================================================
+-- Distributed rate limiting (works across serverless instances)
+-- ============================================================
+
+create table if not exists rate_limits (
+  ip text not null,
+  endpoint text not null,
+  request_count int default 1,
+  window_start timestamptz default now(),
+  primary key (ip, endpoint)
+);
+
+-- No RLS needed — accessed only by service role key
+
+-- Atomic upsert + check function
+create or replace function check_and_increment_rate_limit(
+  p_ip text,
+  p_endpoint text,
+  p_limit int default 30,
+  p_window_start timestamptz default now() - interval '5 minutes'
+)
+returns jsonb
+language plpgsql
+as $$
+declare
+  v_count int;
+  v_allowed boolean;
+begin
+  -- Reset window if expired
+  update rate_limits
+  set request_count = 1, window_start = now()
+  where ip = p_ip
+    and endpoint = p_endpoint
+    and window_start < p_window_start
+  returning request_count into v_count;
+
+  if not found then
+    -- Insert new or increment existing within window
+    insert into rate_limits (ip, endpoint, request_count, window_start)
+    values (p_ip, p_endpoint, 1, now())
+    on conflict (ip, endpoint) do update
+      set request_count = rate_limits.request_count + 1
+    returning request_count into v_count;
+  end if;
+
+  v_allowed := coalesce(v_count, 1) <= p_limit;
+  return jsonb_build_object('allowed', v_allowed, 'request_count', coalesce(v_count, 1));
+end;
+$$;
+
+-- ============================================================
+-- Paper annotations (user highlights + notes on publications)
+-- ============================================================
+
+create table if not exists annotations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  paper_id text not null,
+  highlighted_text text,
+  note text,
+  created_at timestamptz default now()
+);
+
+alter table annotations enable row level security;
+
+create policy "Users manage own annotations" on annotations
+  for all using (auth.uid() = user_id);
+
+create index if not exists annotations_paper_id_idx on annotations(user_id, paper_id);
+
+-- ============================================================
+-- Query result cache (reduces HuggingFace API calls)
+-- ============================================================
+
+create table if not exists query_cache (
+  query_hash text primary key,
+  query_text text,
+  embedding vector(384),
+  results jsonb,
+  created_at timestamptz default now()
+);
+
+-- Auto-clean entries older than 24 hours (run via pg_cron or Supabase scheduled function)
+-- delete from query_cache where created_at < now() - interval '24 hours';
+
+-- ============================================================
+-- Feedback table (thumbs up/down on AI answers)
+-- ============================================================
+
+create table if not exists feedback (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  query text,
+  answer text,
+  sources jsonb,
+  rating smallint check (rating in (1, -1)),
+  context text default 'nasa',  -- 'nasa' or dataset id
+  created_at timestamptz default now()
+);
+
+alter table feedback enable row level security;
+
+create policy "Users insert own feedback" on feedback
+  for insert with check (auth.uid() = user_id or user_id is null);
+
+create policy "Users see own feedback" on feedback
+  for select using (auth.uid() = user_id);
+
+-- ============================================================
+-- Saved research sessions
+-- ============================================================
+
+create table if not exists sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  name text not null,
+  messages jsonb not null default '[]',
+  dataset_id uuid references datasets(id) on delete set null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table sessions enable row level security;
+
+create policy "Users manage own sessions" on sessions
+  for all using (auth.uid() = user_id);
+
+-- ============================================================
 -- Hybrid Search: keyword + vector with Reciprocal Rank Fusion
 -- Run this in Supabase SQL Editor after the initial schema
 -- ============================================================

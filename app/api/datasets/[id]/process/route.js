@@ -3,6 +3,16 @@ import { createServerClient } from '../../../../../lib/supabase';
 const HF_MODEL = 'sentence-transformers/all-MiniLM-L6-v2';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/pipeline/feature-extraction`;
 
+async function withRetry(fn, retries = 3, delayMs = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try { return await fn(); }
+    catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise(r => setTimeout(r, delayMs * 2 ** i));
+    }
+  }
+}
+
 async function embedTexts(texts) {
   const response = await fetch(HF_API_URL, {
     method: 'POST',
@@ -79,9 +89,9 @@ export async function POST(req, { params }) {
       return Response.json({ error: 'Provide 1-20 chunks' }, { status: 400 });
     }
 
-    // Extract texts for batch embedding
-    const texts = chunks.map((c) => c.text.slice(0, 2000));
-    const embeddings = await embedTexts(texts);
+    // Extract texts for batch embedding (full text — no truncation)
+    const texts = chunks.map((c) => c.text);
+    const embeddings = await withRetry(() => embedTexts(texts));
 
     // Prepare rows for insertion
     const rows = chunks.map((c, i) => ({

@@ -6,6 +6,7 @@ export default function ChatPanel({ isOpen, onClose, initialQuery, initialAnswer
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -51,6 +52,7 @@ export default function ChatPanel({ isOpen, onClose, initialQuery, initialAnswer
     setInput('');
     setLoading(true);
 
+    setStreaming(true);
     try {
       const response = await fetch('/api/ask', {
         method: 'POST',
@@ -65,12 +67,45 @@ export default function ChatPanel({ isOpen, onClose, initialQuery, initialAnswer
       });
 
       if (!response.ok) throw new Error('Failed to get response');
-      const data = await response.json();
 
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: data.answer || 'No response generated.' },
-      ]);
+      // Add a placeholder assistant message and stream tokens into it
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          try {
+            const event = JSON.parse(raw);
+            if (event.token) {
+              fullContent += event.token;
+              setMessages(prev => {
+                const next = [...prev];
+                next[next.length - 1] = { role: 'assistant', content: fullContent };
+                return next;
+              });
+            }
+          } catch {}
+        }
+      }
+
+      if (!fullContent) {
+        setMessages(prev => {
+          const next = [...prev];
+          next[next.length - 1] = { role: 'assistant', content: 'No response generated.' };
+          return next;
+        });
+      }
     } catch {
       setMessages(prev => [
         ...prev,
@@ -78,6 +113,7 @@ export default function ChatPanel({ isOpen, onClose, initialQuery, initialAnswer
       ]);
     } finally {
       setLoading(false);
+      setStreaming(false);
     }
   }, [input, loading, messages, chunks]);
 
@@ -148,24 +184,33 @@ export default function ChatPanel({ isOpen, onClose, initialQuery, initialAnswer
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 min-h-0">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} ${i >= 2 ? 'animate-fade-in' : ''}`}>
-              {msg.role === 'assistant' && (
-                <div className="w-6 h-6 rounded-md bg-accent/10 border border-accent/15 flex items-center justify-center mr-2.5 mt-1 flex-shrink-0">
-                  <SparklesIcon size={12} className="text-accent" />
+          {messages.map((msg, i) => {
+            const isStreamingThisMsg = streaming && msg.role === 'assistant' && i === messages.length - 1;
+            return (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} ${i >= 2 ? 'animate-fade-in' : ''}`}>
+                {msg.role === 'assistant' && (
+                  <div className="w-6 h-6 rounded-md bg-accent/10 border border-accent/15 flex items-center justify-center mr-2.5 mt-1 flex-shrink-0">
+                    <SparklesIcon size={12} className="text-accent" />
+                  </div>
+                )}
+                <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'max-w-[80%] bg-accent/12 text-content-1 border border-accent/15 rounded-br-md'
+                    : 'max-w-[88%] bg-surface-1 text-content-2 border border-border rounded-bl-md'
+                }`}>
+                  <div className="whitespace-pre-wrap">
+                    {msg.content}
+                    {isStreamingThisMsg && (
+                      <span className="inline-block w-0.5 h-4 bg-accent/70 ml-0.5 animate-pulse align-middle" />
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'max-w-[80%] bg-accent/12 text-content-1 border border-accent/15 rounded-br-md'
-                  : 'max-w-[88%] bg-surface-1 text-content-2 border border-border rounded-bl-md'
-              }`}>
-                <div className="whitespace-pre-wrap">{msg.content}</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          {loading && (
+          {/* Show dots only while loading and no streaming content yet */}
+          {loading && !streaming && (
             <div className="flex justify-start animate-fade-in">
               <div className="w-6 h-6 rounded-md bg-accent/10 border border-accent/15 flex items-center justify-center mr-2.5 mt-1 flex-shrink-0">
                 <SparklesIcon size={12} className="text-accent" />

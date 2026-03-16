@@ -309,7 +309,7 @@ ${contextText}`;
         messages: groqMessages,
         temperature: 0.2,
         max_tokens: 800,
-        stream: false,
+        stream: true,
       }),
     });
 
@@ -319,19 +319,65 @@ ${contextText}`;
       return Response.json({ error: 'AI service error' }, { status: 500 });
     }
 
-    const data = await groqResponse.json();
-    const answer = data.choices?.[0]?.message?.content || 'No response generated.';
+    const encoder = new TextEncoder();
+    const capturedChunks = chunks;
+    const capturedIntent = intent;
 
-    const sourceMatches = answer.match(/\[\[([^\]]+)\]\]/g);
-    const sources = sourceMatches ? sourceMatches.map((m) => m.slice(2, -2)) : [];
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = groqResponse.body.getReader();
+        const decoder = new TextDecoder();
+        let fullAnswer = '';
+        let buffer = '';
 
-    return Response.json({
-      answer,
-      metadata: {
-        sources_cited: sources,
-        chunks_used: chunks.length,
-        model: 'llama-3.3-70b-versatile',
-        intent: { isCountQuery: intent.isCountQuery, isExactNameQuery: intent.isExactNameQuery },
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const data = line.slice(6).trim();
+              if (data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                const token = parsed.choices?.[0]?.delta?.content ?? '';
+                if (token) {
+                  fullAnswer += token;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
+                }
+              } catch {}
+            }
+          }
+
+          const sourceMatches = fullAnswer.match(/\[\[([^\]]+)\]\]/g);
+          const sources = sourceMatches ? sourceMatches.map((m) => m.slice(2, -2)) : [];
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            done: true,
+            metadata: {
+              sources_cited: sources,
+              chunks_used: capturedChunks.length,
+              model: 'llama-3.3-70b-versatile',
+              intent: { isCountQuery: capturedIntent.isCountQuery, isExactNameQuery: capturedIntent.isExactNameQuery },
+            }
+          })}\n\n`));
+        } catch (err) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
+        } finally {
+          controller.close();
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     });
   } catch (error) {

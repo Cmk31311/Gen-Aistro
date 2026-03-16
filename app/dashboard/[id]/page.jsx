@@ -433,8 +433,31 @@ export default function DatasetDashboard() {
         body: JSON.stringify({ question: query.trim() }),
       });
       if (!askRes.ok) throw new Error('AI response failed');
-      const { answer: ans } = await askRes.json();
-      setAnswer(ans || 'No answer generated.');
+
+      // Consume SSE stream
+      const reader = askRes.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullAnswer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          if (!raw) continue;
+          try {
+            const event = JSON.parse(raw);
+            if (event.token) { fullAnswer += event.token; setAnswer(fullAnswer); }
+          } catch {}
+        }
+      }
+
+      if (!fullAnswer) setAnswer('No answer generated.');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -459,8 +482,45 @@ export default function DatasetDashboard() {
         body: JSON.stringify({ question: userMsg, conversation_history: history }),
       });
       if (!res.ok) throw new Error('Chat failed');
-      const { answer: ans } = await res.json();
-      setChatHistory((prev) => [...prev, { role: 'assistant', content: ans }]);
+
+      // Stream tokens into the assistant message
+      setChatHistory((prev) => [...prev, { role: 'assistant', content: '' }]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          if (!raw) continue;
+          try {
+            const event = JSON.parse(raw);
+            if (event.token) {
+              fullContent += event.token;
+              setChatHistory((prev) => {
+                const next = [...prev];
+                next[next.length - 1] = { role: 'assistant', content: fullContent };
+                return next;
+              });
+            }
+          } catch {}
+        }
+      }
+
+      if (!fullContent) {
+        setChatHistory((prev) => {
+          const next = [...prev];
+          next[next.length - 1] = { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' };
+          return next;
+        });
+      }
     } catch (err) {
       setChatHistory((prev) => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
     } finally {

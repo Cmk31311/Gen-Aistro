@@ -2,15 +2,17 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { embedQuery } from '../../utils/embed';
 import { EXAMPLE_QUESTIONS } from '../../lib/constants';
-import { exportSearchResults } from '../../lib/exportUtils';
+import { exportSearchResults, exportAsMarkdown, exportSourcesAsCSV } from '../../lib/exportUtils';
 import { useBookmarks } from '../../context/BookmarkContext';
 import SearchFilters from './SearchFilters';
 import SourceCard from './SourceCard';
 import CitationPanel from './CitationPanel';
 import SearchAutocomplete from './SearchAutocomplete';
 import ChatPanel from './ChatPanel';
+import SessionsPanel from '../SessionsPanel';
 import ErrorState from '../../ui/ErrorState';
-import { SearchIcon, StarIcon, CopyIcon, ShareIcon, ExportIcon, ChevronDownIcon, ChevronUpIcon, SettingsIcon, SparklesIcon, ChatIcon } from '../../ui/Icons';
+import { useSession } from '../../context/SessionContext';
+import { SearchIcon, StarIcon, CopyIcon, ShareIcon, ExportIcon, ChevronDownIcon, ChevronUpIcon, SettingsIcon, SparklesIcon, ChatIcon, ThumbsUpIcon, ThumbsDownIcon } from '../../ui/Icons';
 
 export default function SearchTab() {
   const [query, setQuery] = useState('');
@@ -27,8 +29,44 @@ export default function SearchTab() {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({ includeKeywords: [], excludeKeywords: [] });
   const [showChat, setShowChat] = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [feedbackGiven, setFeedbackGiven] = useState(null); // 1, -1, or null
   const searchInputRef = useRef(null);
   const { addSearchBookmark } = useBookmarks();
+  const { saveSession } = useSession();
+
+  const handleSaveSession = useCallback(async () => {
+    const name = query.length > 50 ? query.substring(0, 50) + '...' : query;
+    const messages = [
+      { role: 'user', content: query },
+      { role: 'assistant', content: answer },
+    ];
+    const id = await saveSession(name, messages, null, sessionId);
+    if (id) setSessionId(id);
+  }, [query, answer, sessionId, saveSession]);
+
+  const handleLoadSession = useCallback((session) => {
+    const msgs = session.messages || [];
+    const firstUser = msgs.find(m => m.role === 'user');
+    const firstAssistant = msgs.find(m => m.role === 'assistant');
+    if (firstUser) setQuery(firstUser.content);
+    if (firstAssistant) setAnswer(firstAssistant.content);
+    setSessionId(session.id);
+  }, []);
+
+  const submitFeedback = useCallback(async (rating) => {
+    if (feedbackGiven !== null || !answer) return;
+    setFeedbackGiven(rating);
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, answer, sources, rating, context: 'nasa' }),
+      });
+    } catch {}
+  }, [query, answer, sources, feedbackGiven]);
 
   const shareResults = useCallback(async () => {
     const shareData = {
@@ -52,6 +90,8 @@ export default function SearchTab() {
     setMetadata(null);
     setShowCitation(false);
     setShowChat(false);
+    setFeedbackGiven(null);
+    setSessionId(null);
     setSearchHistory(prev => [query, ...prev.filter(q => q !== query).slice(0, 9)]);
 
     try {
@@ -75,11 +115,35 @@ export default function SearchTab() {
         body: JSON.stringify({ question: query, chunks: searchData.results, temperature, max_tokens: maxTokens })
       });
       if (!askResponse.ok) throw new Error('Answer generation failed');
-      const askData = await askResponse.json();
 
-      setAnswer(askData.answer || 'No answer generated');
       setSources(searchData.results);
-      setMetadata(askData.metadata);
+
+      // Consume SSE stream, rendering tokens as they arrive
+      const reader = askResponse.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullAnswer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          try {
+            const event = JSON.parse(raw);
+            if (event.token) {
+              fullAnswer += event.token;
+              setAnswer(fullAnswer);
+            } else if (event.done) {
+              setMetadata(event.metadata);
+            }
+          } catch {}
+        }
+      }
     } catch (err) {
       console.error('Search error:', err);
       setError(err.message || 'An error occurred during search');
@@ -92,9 +156,17 @@ export default function SearchTab() {
     <div className="space-y-6">
       {/* Search Input */}
       <div className="bg-surface-1 rounded-xl border border-border p-7 shadow-card">
-        <div className="flex items-center space-x-2 mb-1">
-          <SparklesIcon size={20} className="text-accent" />
-          <h2 className="text-xl font-bold text-gradient-gold tracking-tight">Search</h2>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center space-x-2">
+            <SparklesIcon size={20} className="text-accent" />
+            <h2 className="text-xl font-bold text-gradient-gold tracking-tight">Search</h2>
+          </div>
+          <button
+            onClick={() => setShowSessions(true)}
+            className="text-xs text-content-3 hover:text-accent transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-2 border border-transparent hover:border-border"
+          >
+            <StarIcon size={13} /> Sessions
+          </button>
         </div>
         <p className="text-content-3 text-sm mb-6">Ask questions about NASA Space Biology research</p>
 
@@ -180,11 +252,14 @@ export default function SearchTab() {
       {/* Answer */}
       {answer && (
         <div className="bg-surface-1 rounded-xl border border-border border-l-4 border-l-accent/50 p-7 animate-slide-up shadow-[0_1px_3px_rgba(0,0,0,0.3),0_0_24px_rgba(240,192,90,0.1)]">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-base font-bold text-content-1 tracking-tight">Answer</h3>
-            <div className="flex items-center space-x-1">
-              <button onClick={() => addSearchBookmark(query, answer)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Save">
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+            <h3 className="text-base font-bold text-content-1 tracking-tight pt-1">Answer</h3>
+            <div className="flex flex-wrap items-center gap-1">
+              <button onClick={() => addSearchBookmark(query, answer)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Bookmark">
                 <StarIcon size={16} />
+              </button>
+              <button onClick={handleSaveSession} className={`p-2 rounded-lg transition-all text-xs font-medium ${sessionId ? 'text-accent bg-accent/10' : 'text-content-3 hover:text-accent hover:bg-surface-2'}`} title={sessionId ? 'Session saved' : 'Save session'}>
+                {sessionId ? '✓ Saved' : 'Save'}
               </button>
               <button onClick={() => setShowCitation(!showCitation)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Citations">
                 <CopyIcon size={16} />
@@ -192,11 +267,37 @@ export default function SearchTab() {
               <button onClick={shareResults} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Share">
                 <ShareIcon size={16} />
               </button>
-              <button onClick={() => exportSearchResults(query, answer, sources)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Export">
-                <ExportIcon size={16} />
-              </button>
+              <div className="relative">
+                <button onClick={() => setShowExportMenu(v => !v)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Export">
+                  <ExportIcon size={16} />
+                </button>
+                {showExportMenu && (
+                  <div className="absolute right-0 top-full mt-1.5 bg-surface-1 rounded-xl border border-border shadow-xl shadow-black/50 z-20 min-w-[150px] overflow-hidden">
+                    <button onClick={() => { exportSearchResults(query, answer, sources); setShowExportMenu(false); }} className="block w-full px-4 py-2.5 text-left text-sm text-content-2 hover:bg-accent-muted hover:text-accent transition-all font-medium">TXT</button>
+                    <button onClick={() => { exportAsMarkdown(query, answer, sources); setShowExportMenu(false); }} className="block w-full px-4 py-2.5 text-left text-sm text-content-2 hover:bg-accent-muted hover:text-accent transition-all font-medium">Markdown</button>
+                    <button onClick={() => { exportSourcesAsCSV(sources); setShowExportMenu(false); }} className="block w-full px-4 py-2.5 text-left text-sm text-content-2 hover:bg-accent-muted hover:text-accent transition-all font-medium">CSV (sources)</button>
+                  </div>
+                )}
+              </div>
               <button onClick={() => setShowChat(true)} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-surface-2 transition-all" title="Follow-up Chat">
                 <ChatIcon size={16} />
+              </button>
+              <div className="w-px h-4 bg-border mx-1" />
+              <button
+                onClick={() => submitFeedback(1)}
+                disabled={feedbackGiven !== null}
+                className={`p-2 rounded-lg transition-all ${feedbackGiven === 1 ? 'text-green-400 bg-green-400/10' : 'text-content-3 hover:text-green-400 hover:bg-surface-2'} disabled:cursor-default`}
+                title="Good answer"
+              >
+                <ThumbsUpIcon size={15} />
+              </button>
+              <button
+                onClick={() => submitFeedback(-1)}
+                disabled={feedbackGiven !== null}
+                className={`p-2 rounded-lg transition-all ${feedbackGiven === -1 ? 'text-red-400 bg-red-400/10' : 'text-content-3 hover:text-red-400 hover:bg-surface-2'} disabled:cursor-default`}
+                title="Poor answer"
+              >
+                <ThumbsDownIcon size={15} />
               </button>
             </div>
           </div>
@@ -232,6 +333,12 @@ export default function SearchTab() {
         initialQuery={query}
         initialAnswer={answer}
         chunks={sources}
+      />
+
+      <SessionsPanel
+        isOpen={showSessions}
+        onClose={() => setShowSessions(false)}
+        onLoadSession={handleLoadSession}
       />
     </div>
   );

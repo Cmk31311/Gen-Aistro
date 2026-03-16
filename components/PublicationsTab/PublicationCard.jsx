@@ -35,7 +35,7 @@ export default function PublicationCard({ publication, onSelect, compareMode, is
       <div className="flex items-center justify-between text-xs text-content-3 mt-3">
         <div className="flex items-center space-x-2">
           {publication.year && <span className="px-2 py-0.5 bg-surface-2 rounded-md border border-border">{publication.year}</span>}
-          {publication.chunks?.length > 0 && <span>{publication.chunks.length} chunks</span>}
+          {publication.chunkCount > 0 && <span>{publication.chunkCount} chunks</span>}
         </div>
         <div className="flex items-center space-x-2">
           {publication.url && (

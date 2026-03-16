@@ -3,6 +3,7 @@ import { PapersProvider } from '../context/PapersContext'
 import { BookmarkProvider } from '../context/BookmarkContext'
 import { ThemeProvider } from '../context/ThemeContext'
 import { AuthProvider } from '../context/AuthContext'
+import { SessionProvider } from '../context/SessionContext'
 
 export const metadata = {
   title: 'Gen-Aistro - NASA Space Biology Knowledge Engine',
@@ -16,9 +17,11 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ThemeProvider>
             <BookmarkProvider>
-              <PapersProvider>
-                {children}
-              </PapersProvider>
+              <SessionProvider>
+                <PapersProvider>
+                  {children}
+                </PapersProvider>
+              </SessionProvider>
             </BookmarkProvider>
           </ThemeProvider>
         </AuthProvider>

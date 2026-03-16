@@ -1,4 +1,6 @@
 
+import { getCachedQuery, setCachedQuery } from '../../../lib/queryCache';
+
 const HF_MODEL = 'sentence-transformers/all-MiniLM-L6-v2';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/pipeline/feature-extraction`;
 
@@ -18,6 +20,17 @@ export async function POST(req) {
         { error: 'Text too long (max 1000 characters)' },
         { status: 400 }
       );
+    }
+
+    // Check server-side embedding cache (avoids HuggingFace API call for repeated queries)
+    const cached = await getCachedQuery(text);
+    if (cached?.embedding) {
+      const vec = typeof cached.embedding === 'string'
+        ? cached.embedding.replace(/[\[\]]/g, '').split(',').map(Number)
+        : cached.embedding;
+      if (Array.isArray(vec) && vec.length === 384) {
+        return Response.json({ embedding: vec, cached: true });
+      }
     }
 
     if (!process.env.HUGGINGFACE_API_KEY) {
@@ -80,6 +93,9 @@ export async function POST(req) {
         { status: 500 }
       );
     }
+
+    // Cache the embedding for future identical queries
+    setCachedQuery(text, vector, null).catch(() => {});
 
     return Response.json({ embedding: vector });
 
