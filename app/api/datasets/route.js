@@ -34,6 +34,7 @@ export async function POST(req) {
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
+      console.error('POST /api/datasets: Missing authHeader');
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -42,6 +43,7 @@ export async function POST(req) {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
+      console.error('POST /api/datasets: authError or missing user', authError, user);
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
