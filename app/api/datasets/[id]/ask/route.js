@@ -1,4 +1,4 @@
-import { createServerClient } from '../../../../../lib/supabase';
+import { createServerClient } from '../../../../../lib/supabase-server';
 
 const HF_MODEL = 'sentence-transformers/all-MiniLM-L6-v2';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}/pipeline/feature-extraction`;

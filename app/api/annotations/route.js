@@ -1,4 +1,4 @@
-import { createServerClient } from '../../../lib/supabase';
+import { createServerClient } from '../../../lib/supabase-server';
 
 async function getUser(req, supabase) {
   const authHeader = req.headers.get('authorization');

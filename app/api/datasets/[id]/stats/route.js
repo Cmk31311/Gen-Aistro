@@ -1,4 +1,4 @@
-import { createServerClient } from '../../../../../lib/supabase';
+import { createServerClient } from '../../../../../lib/supabase-server';
 
 const STOP_WORDS = new Set([
   'the','and','for','are','was','with','that','this','from','have','been',
