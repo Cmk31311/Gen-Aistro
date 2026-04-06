@@ -211,6 +211,18 @@ create policy "Users manage own sessions" on sessions
 -- Run this in Supabase SQL Editor after the initial schema
 -- ============================================================
 
+-- ============================================================
+-- pg_trgm: fast trigram indexes for ilike '%term%' fallback
+-- ============================================================
+
+create extension if not exists pg_trgm;
+
+create index if not exists chunks_text_trgm_idx
+  on chunks using gist (text gist_trgm_ops);
+
+create index if not exists chunks_doc_title_trgm_idx
+  on chunks using gist (doc_title gist_trgm_ops);
+
 -- GIN indexes for full-text keyword search
 create index if not exists chunks_text_fts_idx
   on chunks using gin(to_tsvector('english', text));
@@ -272,7 +284,7 @@ as $$
     where c.dataset_id = match_dataset_id
       and to_tsvector('english', c.text || ' ' || coalesce(c.doc_title, ''))
           @@ plainto_tsquery('english', query_text)
-    limit 50
+    limit greatest(match_count * 5, 100)
   ),
 
   -- 3. Vector similarity search
@@ -284,7 +296,7 @@ as $$
       ) as vector_rank
     from chunks c
     where c.dataset_id = match_dataset_id
-    limit 50
+    limit greatest(match_count * 5, 100)
   ),
 
   -- 4. RRF fusion of keyword + vector

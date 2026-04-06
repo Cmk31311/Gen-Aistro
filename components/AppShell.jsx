@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TABS } from '../lib/constants';
 import { useTheme } from '../context/ThemeContext';
 import { useBookmarks } from '../context/BookmarkContext';
@@ -12,13 +13,12 @@ import InsightsTab from './InsightsTab/InsightsTab';
 import DeepResearchTab from './DeepResearchTab';
 import BookmarksPanel from './BookmarksPanel';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
-import { StarIcon, SunIcon, MoonIcon, KeyboardIcon, RocketIcon, DatabaseIcon, TrendingUpIcon, ZapIcon, SparklesIcon, FlaskIcon } from '../ui/Icons';
+import { StarIcon, KeyboardIcon, RocketIcon, DatabaseIcon, TrendingUpIcon, ZapIcon, SparklesIcon, FlaskIcon } from '../ui/Icons';
 
 export default function AppShell() {
   const [activeTab, setActiveTab] = useState(TABS.SEARCH);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const { toggleTheme, isDark } = useTheme();
   const { paperCount } = useBookmarks();
   const { user } = useAuth();
 
@@ -51,110 +51,145 @@ export default function AppShell() {
   ];
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Ambient glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#F0C05A]/[0.04] rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed top-[-100px] left-[60%] w-[500px] h-[300px] bg-[#F0C05A]/[0.025] rounded-full blur-[100px] pointer-events-none" />
+    <div className="min-h-screen bg-bg text-content-2 selection:bg-accent/20">
+      {/* Absolute Ambient Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute top-[-10%] left-[20%] w-[800px] h-[500px] bg-accent/5 blur-[120px] rounded-full" 
+        />
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 3, delay: 0.5 }}
+          className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-900/10 blur-[150px] rounded-full" 
+        />
+      </div>
 
-      <div className="relative z-10">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-accent focus:text-black">
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-accent focus:text-bg">
           Skip to content
         </a>
 
-        {/* ── Header ─────────────────────────────────────────── */}
-        <header className="sticky top-0 z-20 bg-bg/75 backdrop-blur-xl border-b border-white/[0.06]">
-          {/* Glow line across top */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="flex items-center h-14 gap-3 overflow-x-auto scrollbar-none">
-
+        {/* ── Floated Header ─────────────────────────────────────────── */}
+        <header className="sticky top-4 z-40 mx-4 sm:mx-6 lg:mx-auto max-w-6xl mt-4">
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center justify-between h-14 px-4 rounded-2xl glass-header shadow-glass border border-white/5"
+          >
+            <div className="flex items-center gap-6 h-full">
               {/* Logo */}
-              <a href="/" className="flex items-center gap-2 shrink-0">
-                <div className="w-7 h-7 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center shadow-[0_0_14px_rgba(240,192,90,0.18)]">
-                  <SparklesIcon size={13} className="text-accent" />
+              <a href="/" className="flex items-center gap-2.5 shrink-0 group">
+                <div className="w-8 h-8 rounded-[10px] bg-accent/10 border border-accent/20 flex items-center justify-center shadow-glow-accent transition-transform group-hover:scale-105">
+                  <SparklesIcon size={14} className="text-accent" />
                 </div>
-                <span className="text-[15px] font-bold text-gradient-gold tracking-tight whitespace-nowrap">Gen-Aistro</span>
+                <span className="text-[16px] font-semibold text-content-1 tracking-tight">Gen-Aistro</span>
               </a>
 
-              {/* Separator */}
-              <div className="h-5 w-px bg-white/8 shrink-0" />
+              <div className="hidden md:block w-px h-5 bg-white/10" />
 
-              {/* Nav tabs — pill active state */}
-              <nav className="flex items-center gap-0.5 shrink-0" role="tablist">
-                {tabs.map(({ key, label, icon: Icon }) => (
-                  <button
-                    key={key}
-                    role="tab"
-                    aria-selected={activeTab === key}
-                    onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-150 whitespace-nowrap ${
-                      activeTab === key
-                        ? 'bg-accent/12 text-accent font-medium ring-1 ring-accent/20'
-                        : 'text-content-3 hover:text-content-1 hover:bg-white/5'
-                    }`}
-                  >
-                    <Icon size={13} />
-                    <span>{label}</span>
-                  </button>
-                ))}
+              {/* Dynamic Nav Tabs */}
+              <nav className="hidden md:flex items-center gap-1" role="tablist">
+                {tabs.map(({ key, label, icon: Icon }) => {
+                  const isActive = activeTab === key;
+                  return (
+                    <button
+                      key={key}
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveTab(key)}
+                      className={`relative flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-[13px] font-medium transition-colors duration-200 ${
+                        isActive ? 'text-accent' : 'text-content-3 hover:text-content-1'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeTabIndicator"
+                          className="absolute inset-0 bg-accent/10 rounded-xl"
+                          initial={false}
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <Icon size={14} className="relative z-10" />
+                      <span className="relative z-10">{label}</span>
+                    </button>
+                  );
+                })}
               </nav>
+            </div>
 
-              {/* Spacer */}
-              <div className="flex-1 min-w-0" />
-
-              {/* Utility icons */}
-              <div className="flex items-center gap-0.5 shrink-0">
-                <button onClick={() => setShowBookmarks(true)} className="relative p-2 rounded-lg text-content-3 hover:text-accent hover:bg-white/5 transition-all" aria-label="Bookmarks">
-                  <StarIcon size={15} />
-                  {paperCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_6px_rgba(240,192,90,0.7)]" />}
+            {/* Right utility actions */}
+            <div className="flex items-center gap-1.5 shrink-0 h-full">
+              <div className="flex items-center gap-0.5">
+                <button onClick={() => setShowBookmarks(true)} className="relative p-2 rounded-xl text-content-3 hover:text-content-1 hover:bg-white/5 transition-all" aria-label="Bookmarks">
+                  <StarIcon size={16} />
+                  {paperCount > 0 && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_8px_rgba(229,169,61,0.8)]" 
+                    />
+                  )}
                 </button>
-                <button onClick={toggleTheme} className="p-2 rounded-lg text-content-3 hover:text-accent hover:bg-white/5 transition-all" aria-label="Toggle theme">
-                  {isDark ? <SunIcon size={15} /> : <MoonIcon size={15} />}
-                </button>
-                <button onClick={() => setShowShortcuts(true)} className="hidden sm:flex p-2 rounded-lg text-content-3 hover:text-accent hover:bg-white/5 transition-all" aria-label="Shortcuts">
-                  <KeyboardIcon size={15} />
+                <button onClick={() => setShowShortcuts(true)} className="hidden sm:flex p-2 rounded-xl text-content-3 hover:text-content-1 hover:bg-white/5 transition-all" aria-label="Shortcuts">
+                  <KeyboardIcon size={16} />
                 </button>
               </div>
 
-              {/* Separator */}
-              <div className="h-5 w-px bg-white/8 shrink-0" />
+              <div className="w-px h-5 bg-white/10 mx-1" />
 
-              {/* My Datasets + Sign In */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* My Datasets + Auth */}
+              <div className="flex items-center gap-2">
                 <a
                   href="/datasets"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-accent/25 text-accent bg-gradient-to-br from-accent/12 to-accent/4 hover:border-accent/45 hover:from-accent/20 hover:to-accent/8 transition-all shadow-[0_0_16px_rgba(240,192,90,0.07)] whitespace-nowrap"
+                  className="flex items-center gap-2 px-3.5 py-1.5 text-[13px] font-medium rounded-xl text-accent/90 border border-accent/20 bg-accent/5 hover:border-accent/40 hover:text-accent hover:bg-accent/10 transition-all shadow-glow-subtle whitespace-nowrap"
                 >
-                  <DatabaseIcon size={13} />
-                  <span>My Datasets</span>
+                  <DatabaseIcon size={14} />
+                  <span>Datasets</span>
                 </a>
                 {!user && (
                   <a
                     href="/login"
-                    className="flex items-center px-3 py-1.5 text-sm text-content-2 hover:text-accent hover:bg-white/5 rounded-lg transition-all whitespace-nowrap"
+                    className="flex items-center px-4 py-1.5 text-[13px] font-medium text-bg bg-content-1 hover:bg-white rounded-xl transition-all shadow-glass"
                   >
                     Sign In
                   </a>
                 )}
               </div>
-
             </div>
-          </div>
+          </motion.div>
         </header>
 
-        <main id="main-content" className="max-w-6xl mx-auto px-4 sm:px-6 py-8" role="tabpanel" aria-live="polite">
-          <div className="animate-fade-in">
-            {activeTab === TABS.SEARCH && <SearchTab />}
-            {activeTab === TABS.GRAPH && <PublicationsTab />}
-            {activeTab === TABS.ANALYTICS && <AnalyticsTab />}
-            {activeTab === TABS.INSIGHTS && <InsightsTab />}
-            {activeTab === TABS.RESEARCH && <DeepResearchTab />}
-          </div>
+        {/* ── Main Content Area ──────────────────────────────────────── */}
+        <main id="main-content" className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-12 pb-24" role="tabpanel" aria-live="polite">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full"
+            >
+              {activeTab === TABS.SEARCH && <SearchTab />}
+              {activeTab === TABS.GRAPH && <PublicationsTab />}
+              {activeTab === TABS.ANALYTICS && <AnalyticsTab />}
+              {activeTab === TABS.INSIGHTS && <InsightsTab />}
+              {activeTab === TABS.RESEARCH && <DeepResearchTab />}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
-        <footer className="mt-16">
-          <div className="h-px bg-gradient-to-r from-transparent via-accent/15 to-transparent" />
+        <footer className="mt-auto max-w-6xl mx-auto w-full px-4 sm:px-6 pb-6">
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="pt-4 flex justify-between text-xs text-content-3">
+            <span>Powered by NASA Open Data</span>
+            <span>Gen-Aistro v1.0</span>
+          </div>
         </footer>
       </div>
 
