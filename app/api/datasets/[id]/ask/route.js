@@ -332,7 +332,7 @@ export async function POST(req, { params }) {
     const queryEmbedding = embeddings[0]; // primary embedding
 
     // Search for each query variant concurrently
-    const perQueryK = variants.length > 0 ? 12 : 20;
+    const perQueryK = variants.length > 0 ? 50 : 80;
     const allCandidateSets = await Promise.all(
       allQueries.map((q, i) =>
         searchChunks(supabase, id, q, embeddings[i], perQueryK,
@@ -359,9 +359,9 @@ export async function POST(req, { params }) {
 
     const mergedCandidates = Array.from(candidateMap.values())
       .sort((a, b) => (b.score || 0) - (a.score || 0))
-      .slice(0, 30);
+      .slice(0, 200);
 
-    const chunks = mmrDiversify(mergedCandidates, queryEmbedding, 10, 0.5);
+    const chunks = mmrDiversify(mergedCandidates, queryEmbedding, 60, 0.5);
 
     // Fetch aggregate stats for count questions
     let statsBlock = '';
@@ -425,16 +425,15 @@ export async function POST(req, { params }) {
       ? '\nNote: Only a small number of relevant passages were found. Acknowledge gaps explicitly and do not extrapolate.'
       : '';
 
-    const systemPrompt = `You are a precise research assistant for the "${dataset.name}" dataset. Answer questions strictly from the provided context passages.
+    const systemPrompt = `You are a highly capable AI research assistant analyzing the "${dataset.name}" dataset. Your goal is to provide the most helpful, comprehensive answer possible.
 
 RULES:
-1. Cite every factual claim with [[Title (Year)]] inline, using the exact title from the passage header.
-2. If multiple passages support a point, cite all of them: [[A (2020)]] [[B (2021)]].
-3. If the context contains partial information, synthesize what IS available, then explicitly state what is missing or uncertain.
-4. Do NOT infer, extrapolate, or use outside knowledge. If a fact is not in the context, say: "The provided dataset does not contain this information."
-5. For count or aggregate questions, use the DATASET AGGREGATE STATISTICS block — those numbers are authoritative. Do not count from the context passages.
-6. Keep answers concise: prefer bullet points for lists, prose for explanations.
-7. If asked about a specific named item, describe every attribute the context provides for it.${contextPartialNote}
+1. Whenever possible, use the provided context passages and cite them using [[Title (Year)]].
+2. If the context passages do not fully answer the question, YOU ARE FULLY AUTHORIZED AND ENCOURAGED to use your vast general world knowledge to complete the answer!
+3. When using your own knowledge, briefly mention that this is general knowledge supplementing the dataset.
+4. For count or aggregate questions, use the DATASET AGGREGATE STATISTICS block if applicable. 
+5. Keep answers clear, beautifully formatted, and deeply informative. Never refuse a question if you know the answer!
+
 ${statsBlock}
 CONTEXT PASSAGES (grouped by source document):
 ${contextText}`;
